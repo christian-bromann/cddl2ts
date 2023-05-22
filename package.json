@@ -44,7 +44,7 @@
   "dependencies": {
     "@babel/parser": "^7.21.9",
     "camelcase": "^7.0.1",
-    "cddl": "^0.8.2",
+    "cddl": "^0.8.3",
     "recast": "^0.23.2",
     "yargs": "^17.7.2"
   }
