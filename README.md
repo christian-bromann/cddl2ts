@@ -1,76 +1,37 @@
-CDDL ![Test](https://github.com/christian-bromann/cddl/workflows/Test/badge.svg?branch=master)
-====
+CDDL to TypeScript ![Test](https://github.com/christian-bromann/cddl/workflows/Test/badge.svg?branch=master)
+==================
 
-> Concise data definition language ([RFC 8610](https://tools.ietf.org/html/rfc8610)) implementation and JSON validator in Node.js.
+> A Node.js package that can generate a TypeScript definition based on a CDDL file
 
-CDDL expresses Concise Binary Object Representation (CBOR) data structures ([RFC 7049](https://tools.ietf.org/html/rfc7049)). Its main goal is to provide an easy and unambiguous way to express structures for protocol messages and data formats that use CBOR or JSON.
+CDDL expresses Concise Binary Object Representation (CBOR) data structures ([RFC 7049](https://tools.ietf.org/html/rfc7049)). Its main goal is to provide an easy and unambiguous way to express structures for protocol messages and data formats that use CBOR or JSON. This package allows you to transform a CDDL file into a TypeScript interface that you can use for other TypeScript project.
 
-There are also CDDL parsers for other languages:
-- Rust: [anweiss/cddl](https://github.com/anweiss/cddl)
-
-__Note:__ this is __work in progress__, feel free to have a look at the code or contribute but don't use this for anything yet!
+Related projects:
+- [christian-bromann/cddl](https://github.com/christian-bromann/cddl): parses CDDL into an AST
 
 ## Install
 
 To install this package run:
 
 ```sh
-$ npm install cddl
+$ npm install cddl2ts
 ```
 
 ## Using this package
 
-This package exposes a CLI as well as a programmatic interface for parsing and transforming CDDL.
+This package exposes a CLI as well as a programmatic interface for transforming CDDL into TypeScript.
 
 ### CLI
 
-The `cddl` CLI offers a `validate` command that helps identify invalid CDDL formats, e.g.:
-
 ```sh
-npx cddl validate ./path/to/interface.cddl
-✅ Valid CDDL file!
+npx cddl2ts ./path/to/interface.cddl &> ./path/to/interface.ts
 ```
 
 ### Programmatic Interface
 
-You can also use this package to parse a CDDL file into:
-
-- an [abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST).
-- or a [TypeScript](https://www.typescriptlang.org/) definition
-
-For example, given the following CDDL file:
-
-```cddl
-person = {
-    identity,       ; an identity
-    employer: tstr, ; some employer
-}
-```
-
-By default the package parses the content into an AST:
+The module exports a `transform` method that takes an CDDL AST object and returns a TypeScript definition as `string`, e.g.:
 
 ```js
-import { parse } from 'cddl'
-
-const ast = parse('./spec.cddl')
-console.log(ast)
-/**
- * outputs:
- * [
- *   {
- *     Type: 'group',
- *     Name: 'person',
- *     Properties: [ [Object], [Object] ],
- *     IsChoiceAddition: false
- *   }
- * ]
- */
-```
-
-You can apply a target specifier to transform the AST into a different language or format (currently supported: `ts` for TypeScript). Note that this is highly experimental and work in progress.
-
-```js
-import { parse } from 'cddl'
+import { transform } from 'cddl2ts'
 
 /**
  * spec.cddl:
@@ -82,7 +43,7 @@ import { parse } from 'cddl'
  *   ?platformName: text,
  * };
  */
-const ts = parse('./spec.cddl', { target: 'ts' })
+const ts = transform('./spec.cddl')
 console.log(ts)
 /**
  * outputs:
@@ -98,4 +59,4 @@ console.log(ts)
 
 ---
 
-If you are interested in this project, please feel free to contribute ideas or code patches. Have a look at our [contributing](https://github.com/christian-bromann/cddl/blob/master/LICENSE) guidelines](https://github.com/christian-bromann/cddl/blob/master/LICENSE) to get started.
+If you are interested in this project, please feel free to contribute ideas or code patches. Have a look at our [contributing guidelines](https://github.com/christian-bromann/cddl2ts/blob/master/CONTRIBUTING.md) to get started.

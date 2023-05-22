@@ -8,8 +8,8 @@ export default defineConfig({
         coverage: {
             enabled: true,
             lines: 92,
-            functions: 88,
-            branches: 92,
+            functions: 100,
+            branches: 86,
             statements: 92
         }
     }

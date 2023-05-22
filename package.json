@@ -1,24 +1,24 @@
 {
-  "name": "cddl",
-  "version": "0.7.0",
-  "description": "Concise data definition language (RFC 8610) implementation and JSON validator in Node.js",
-  "author": "Christian Bromann <christian@saucelabs.com>",
+  "name": "cddl2ts",
+  "version": "0.0.0",
+  "description": "A Node.js package that can generate a TypeScript definition based on a CDDL file",
+  "author": "Christian Bromann <mail@bromann.dev>",
   "license": "MIT",
-  "homepage": "https://github.com/christian-bromann/cddl#readme",
+  "homepage": "https://github.com/christian-bromann/cddl2ts#readme",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/christian-bromann/cddl.git"
+    "url": "git+ssh://git@github.com/christian-bromann/cddl2ts.git"
   },
   "keywords": [
     "cddl"
   ],
   "bugs": {
-    "url": "https://github.com/christian-bromann/cddl/issues"
+    "url": "https://github.com/christian-bromann/cddl2ts/issues"
   },
   "type": "module",
   "exports": "./build/index.js",
   "bin": {
-    "cddl": "./bin/cddl.js"
+    "cddl2ts": "./bin/cddl2ts.js"
   },
   "scripts": {
     "build": "run-s clean compile",
@@ -33,18 +33,19 @@
     "watch": "tsc --watch"
   },
   "devDependencies": {
-    "@types/jest": "^29.4.0",
-    "@types/node": "^18.14.6",
-    "@vitest/coverage-c8": "^0.29.2",
+    "@types/jest": "^29.5.1",
+    "@types/node": "^20.2.3",
+    "@vitest/coverage-c8": "^0.31.1",
     "npm-run-all": "^4.1.5",
-    "release-it": "^15.7.0",
-    "typescript": "^4.9.5",
-    "vitest": "^0.29.2"
+    "release-it": "^15.10.3",
+    "typescript": "^5.0.4",
+    "vitest": "^0.31.1"
   },
   "dependencies": {
-    "@babel/parser": "^7.21.4",
+    "@babel/parser": "^7.21.9",
     "camelcase": "^7.0.1",
-    "recast": "^0.22.0",
-    "yargs": "^17.7.1"
+    "cddl": "^0.8.2",
+    "recast": "^0.23.2",
+    "yargs": "^17.7.2"
   }
 }
