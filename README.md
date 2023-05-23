@@ -1,4 +1,4 @@
-CDDL to TypeScript ![Test](https://github.com/christian-bromann/cddl2ts/workflows/Test/badge.svg?branch=master)
+CDDL to TypeScript [![Test](https://github.com/christian-bromann/cddl2ts/actions/workflows/test.yml/badge.svg)](https://github.com/christian-bromann/cddl2ts/actions/workflows/test.yml)
 ==================
 
 > A Node.js package that can generate a TypeScript definition based on a CDDL file
