@@ -84,3 +84,5 @@ someGroup = {
 
 script.ListLocalValue = [*script.LocalValue];
 script.MappingLocalValue = [*[(script.LocalValue / text), script.LocalValue]];
+
+Extensible = (*text => any) ; some comments here

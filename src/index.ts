@@ -8,6 +8,7 @@ import { pkg } from './constants.js'
 
 const b = types.builders
 const NATIVE_TYPES: Record<string, any> = {
+    any: b.tsAnyKeyword(),
     number: b.tsNumberKeyword(),
     float: b.tsNumberKeyword(),
     uint: b.tsNumberKeyword(),
@@ -66,6 +67,17 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
 
     if (assignment.Type === 'group') {
         const id = b.identifier(camelcase(assignment.Name, { pascalCase: true }))
+
+        /**
+         * transform CDDL groups like `Extensible = (*text => any)`
+         */
+        if (assignment.Properties.length === 1 && ((assignment.Properties as Property[])[0].Type as PropertyType[]).length === 1 && Object.keys(NATIVE_TYPES).includes(((assignment.Properties as Property[])[0].Name))) {
+            const value = parseUnionType(assignment)
+            const expr = b.tsTypeAliasDeclaration(id, value)
+            expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
+            return expr
+        }
+
         const objectType = parseObjectType(assignment.Properties as any)
         const extendInterfaces = (assignment.Properties as Property[])
             .filter((prop: Property) => prop.Name === '')
@@ -182,10 +194,26 @@ function parseUnionType (t: PropertyType | Assignment): TSTypeKind {
     } else if (t.Type === 'group') {
         const value = (t as PropertyReference).Value as string
         /**
-         * check if we have
-         * ?attributes: {*text => text},
+         * check if we have special groups
          */
         if (!value && (t as Group).Properties) {
+            const prop = (t as Group).Properties
+            /**
+             * {*text => text} which will be transformed to `Record<string, string>`
+             */
+            if (prop.length === 1 && Object.keys(NATIVE_TYPES).includes((prop[0] as Property).Name)) {
+                return b.tsTypeReference(
+                    b.identifier('Record'),
+                    b.tsTypeParameterInstantiation([
+                        NATIVE_TYPES[(prop[0] as Property).Name],
+                        parseUnionType(((prop[0] as Property).Type as PropertyType[])[0])
+                    ])
+                )
+            }
+
+            /**
+             * e.g. ?attributes: {*foo => text},
+             */
             return b.tsTypeLiteral(parseObjectType((t as Group).Properties as Property[]))
         }
 
