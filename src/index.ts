@@ -62,7 +62,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
 
         const expr = b.tsTypeAliasDeclaration(id, typeParameters)
         expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
-        return expr
+        return b.exportDeclaration(false, expr)
     }
 
     if (assignment.Type === 'group') {
@@ -75,7 +75,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             const value = parseUnionType(assignment)
             const expr = b.tsTypeAliasDeclaration(id, value)
             expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
-            return expr
+            return b.exportDeclaration(false, expr)
         }
 
         const objectType = parseObjectType(assignment.Properties as any)
@@ -89,7 +89,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         const expr = b.tsInterfaceDeclaration(id, b.tsInterfaceBody(objectType))
         expr.extends = extendInterfaces
         expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
-        return expr
+        return b.exportDeclaration(false, expr)
     }
 
     if (assignment.Type === 'array') {
@@ -104,7 +104,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         const value = b.tsArrayType(b.tsParenthesizedType(b.tsUnionType(obj)))
         const expr = b.tsTypeAliasDeclaration(id, value)
         expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
-        return expr
+        return b.exportDeclaration(false, expr)
     }
 
     throw new Error(`Unknown assignment type "${(assignment as any).Type}"`)
