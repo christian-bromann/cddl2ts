@@ -31,6 +31,7 @@ npx cddl2ts ./path/to/interface.cddl &> ./path/to/interface.ts
 The module exports a `transform` method that takes an CDDL AST object and returns a TypeScript definition as `string`, e.g.:
 
 ```js
+import { parse } from 'cddl'
 import { transform } from 'cddl2ts'
 
 /**
@@ -43,7 +44,8 @@ import { transform } from 'cddl2ts'
  *   ?platformName: text,
  * };
  */
-const ts = transform('./spec.cddl')
+const ast = parse('./spec.cddl')
+const ts = transform(ast)
 console.log(ts)
 /**
  * outputs:
