@@ -13,14 +13,14 @@ export interface ErrorResponse extends Extensible {
 }
 
 export type ResultData = BrowsingContextResult | EmptyResult | NetworkResult | ScriptResult | SessionResult;
-export type ErrorCode = \\"invalid argument\\" | \\"invalid session id\\" | \\"no such alert\\" | \\"no such frame\\" | \\"no such handle\\" | \\"no such node\\" | \\"no such script\\" | \\"session not created\\" | \\"unknown command\\" | \\"unknown error\\" | \\"unsupported operation\\";
+export type ErrorCode = "invalid argument" | "invalid session id" | "no such alert" | "no such frame" | "no such handle" | "no such node" | "no such script" | "session not created" | "unknown command" | "unknown error" | "unsupported operation";
 export type JsInt = number;
 export type JsUint = number;
 export type Handle = string;
 export type SharedId = string;
 
 export interface UndefinedValue {
-  type: \\"undefined\\";
+  type: "undefined";
 }
 
 export interface NullValue {
@@ -28,14 +28,14 @@ export interface NullValue {
 }
 
 export interface StringValue {
-  type: \\"string\\";
+  type: "string";
   value: string;
 }
 
-export type SpecialNumber = \\"NaN\\" | \\"-0\\" | \\"Infinity\\" | \\"-Infinity\\";
+export type SpecialNumber = "NaN" | "-0" | "Infinity" | "-Infinity";
 
 export interface NumberValue {
-  type: \\"number\\";
+  type: "number";
   value: Number | SpecialNumber;
 }
 
@@ -62,7 +62,7 @@ export interface SomeGroup {
   /**
    * @default 'portrait'
    */
-  orientation?: \\"portrait\\" | \\"landscape\\";
+  orientation?: "portrait" | "landscape";
   /**
    * @default 1
    */
