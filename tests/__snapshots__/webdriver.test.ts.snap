@@ -25,7 +25,7 @@ export interface Event extends EventData, Extensible {
 }
 
 export type EventData = BrowsingContextEvent | InputEvent | LogEvent | NetworkEvent | ScriptEvent;
-export type Extensible = Record<string, any>;
+export type Extensible = Record<string, unknown>;
 export type JsInt = number;
 export type JsUint = number;
 export type ErrorCode = "invalid argument" | "invalid selector" | "invalid session id" | "invalid web extension" | "move target out of bounds" | "no such alert" | "no such network collector" | "no such element" | "no such frame" | "no such handle" | "no such history entry" | "no such intercept" | "no such network data" | "no such node" | "no such request" | "no such script" | "no such storage partition" | "no such user context" | "no such web extension" | "session not created" | "unable to capture screen" | "unable to close browser" | "unable to set cookie" | "unable to set file input" | "unavailable network data" | "underspecified storage partition" | "unknown command" | "unknown error" | "unsupported operation";
@@ -151,7 +151,7 @@ export type BrowserSetDownloadBehaviorResult = EmptyResult;
 export type BrowsingContextResult = BrowsingContextActivateResult | BrowsingContextCaptureScreenshotResult | BrowsingContextCloseResult | BrowsingContextCreateResult | BrowsingContextGetTreeResult | BrowsingContextHandleUserPromptResult | BrowsingContextLocateNodesResult | BrowsingContextNavigateResult | BrowsingContextPrintResult | BrowsingContextReloadResult | BrowsingContextSetBypassCspResult | BrowsingContextSetViewportResult | BrowsingContextTraverseHistoryResult;
 export type BrowsingContextEvent = BrowsingContextContextCreated | BrowsingContextContextDestroyed | BrowsingContextDomContentLoaded | BrowsingContextDownloadEnd | BrowsingContextDownloadWillBegin | BrowsingContextFragmentNavigated | BrowsingContextHistoryUpdated | BrowsingContextLoad | BrowsingContextNavigationAborted | BrowsingContextNavigationCommitted | BrowsingContextNavigationFailed | BrowsingContextNavigationStarted | BrowsingContextUserPromptClosed | BrowsingContextUserPromptOpened;
 export type BrowsingContextBrowsingContext = string;
-export type BrowsingContextInfoList = (BrowsingContextInfo)[];
+export type BrowsingContextInfoList = BrowsingContextInfo[];
 
 export interface BrowsingContextInfo {
   children: BrowsingContextInfoList | null;
@@ -590,7 +590,7 @@ export interface ScriptExceptionDetails {
 export type ScriptHandle = string;
 export type ScriptInternalId = string;
 export type ScriptLocalValue = ScriptRemoteReference | ScriptPrimitiveProtocolValue | ScriptChannelValue | ScriptArrayLocalValue | {} | ScriptObjectLocalValue | {};
-export type ScriptListLocalValue = (ScriptLocalValue)[];
+export type ScriptListLocalValue = ScriptLocalValue[];
 
 export interface ScriptArrayLocalValue {
   type: "array";
@@ -720,7 +720,7 @@ export interface ScriptRemoteObjectReference extends Extensible {
 }
 
 export type ScriptRemoteValue = ScriptPrimitiveProtocolValue | ScriptSymbolRemoteValue | ScriptArrayRemoteValue | ScriptObjectRemoteValue | ScriptFunctionRemoteValue | ScriptRegExpRemoteValue | ScriptDateRemoteValue | ScriptMapRemoteValue | ScriptSetRemoteValue | ScriptWeakMapRemoteValue | ScriptWeakSetRemoteValue | ScriptGeneratorRemoteValue | ScriptErrorRemoteValue | ScriptProxyRemoteValue | ScriptPromiseRemoteValue | ScriptTypedArrayRemoteValue | ScriptArrayBufferRemoteValue | ScriptNodeListRemoteValue | ScriptHtmlCollectionRemoteValue | ScriptNodeRemoteValue | ScriptWindowProxyRemoteValue;
-export type ScriptListRemoteValue = (ScriptRemoteValue)[];
+export type ScriptListRemoteValue = ScriptRemoteValue[];
 export type ScriptMappingRemoteValue = (ScriptRemoteValue | ScriptRemoteValue)[];
 
 export interface ScriptSymbolRemoteValue {
@@ -1022,7 +1022,7 @@ exports[`webdriver examples > should generate types for remote.cddl 1`] = `
 
 export type CommandData = BrowserCommand | BrowsingContextCommand | EmulationCommand | InputCommand | NetworkCommand | ScriptCommand | SessionCommand | StorageCommand | WebExtensionCommand;
 export interface EmptyParams extends Extensible {}
-export type Extensible = Record<string, any>;
+export type Extensible = Record<string, unknown>;
 export type JsInt = number;
 export type JsUint = number;
 export type SessionCommand = SessionEnd | SessionNew | SessionStatus | SessionSubscribe | SessionUnsubscribe;
@@ -1934,7 +1934,7 @@ export interface ScriptExceptionDetails {
 export type ScriptHandle = string;
 export type ScriptInternalId = string;
 export type ScriptLocalValue = ScriptRemoteReference | ScriptPrimitiveProtocolValue | ScriptChannelValue | ScriptArrayLocalValue | {} | ScriptObjectLocalValue | {};
-export type ScriptListLocalValue = (ScriptLocalValue)[];
+export type ScriptListLocalValue = ScriptLocalValue[];
 
 export interface ScriptArrayLocalValue {
   type: "array";
@@ -2021,7 +2021,7 @@ export interface ScriptRemoteObjectReference extends Extensible {
 }
 
 export type ScriptRemoteValue = ScriptPrimitiveProtocolValue | ScriptSymbolRemoteValue | ScriptArrayRemoteValue | ScriptObjectRemoteValue | ScriptFunctionRemoteValue | ScriptRegExpRemoteValue | ScriptDateRemoteValue | ScriptMapRemoteValue | ScriptSetRemoteValue | ScriptWeakMapRemoteValue | ScriptWeakSetRemoteValue | ScriptGeneratorRemoteValue | ScriptErrorRemoteValue | ScriptProxyRemoteValue | ScriptPromiseRemoteValue | ScriptTypedArrayRemoteValue | ScriptArrayBufferRemoteValue | ScriptNodeListRemoteValue | ScriptHtmlCollectionRemoteValue | ScriptNodeRemoteValue | ScriptWindowProxyRemoteValue;
-export type ScriptListRemoteValue = (ScriptRemoteValue)[];
+export type ScriptListRemoteValue = ScriptRemoteValue[];
 export type ScriptMappingRemoteValue = (ScriptRemoteValue | ScriptRemoteValue)[];
 
 export interface ScriptSymbolRemoteValue {

@@ -26,38 +26,44 @@ describe('cddl2ts', () => {
 
     it('should print help if no args were provided', async () => {
         await cli([])
-        expect(console.log).toBeCalledWith(expect.stringMatching(/foobar/))
-        expect(process.exit).toBeCalledWith(0)
+
+        expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/foobar/)) // Yargs showHelp() defaults to stderr
+        expect(process.exit).toHaveBeenCalledWith(0)
     })
 
     it('should print help --help is set in args', async () => {
         await cli(['foo', 'bar', '--help', 'barfoo'])
-        expect(console.log).toBeCalledWith(expect.stringMatching(/foobar/))
-        expect(process.exit).toBeCalledWith(0)
+
+        expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/foobar/))
+        expect(process.exit).toHaveBeenCalledWith(0)
     })
 
     it('should print version', async () => {
         await cli(['foo', '-v', 'bar'])
-        expect(console.log).toBeCalledWith('1.2.3')
-        expect(process.exit).toBeCalledWith(0)
+
+        expect(console.log).toHaveBeenCalledWith('1.2.3')
+        expect(process.exit).toHaveBeenCalledWith(0)
     })
 
     it('should print version', async () => {
         await cli(['foo', '--version', 'bar'])
-        expect(console.log).toBeCalledWith('1.2.3')
-        expect(process.exit).toBeCalledWith(0)
+
+        expect(console.log).toHaveBeenCalledWith('1.2.3')
+        expect(process.exit).toHaveBeenCalledWith(0)
     })
 
     it('should fail if first parameter is not pointing to a file', async () => {
         await cli(['foo'])
-        expect(console.error).toBeCalledTimes(1)
-        expect(process.exit).toBeCalledWith(1)
+
+        expect(console.error).toHaveBeenCalledTimes(1)
+        expect(process.exit).toHaveBeenCalledWith(1)
     })
 
     it('should fail if first parameter is not pointing to a file', async () => {
         await cli([path.join(__dirname, '__fixtures__', 'test.cddl')])
+
         expect(vi.mocked(console.log).mock.calls).toMatchSnapshot()
-        expect(process.exit).toBeCalledTimes(0)
+        expect(process.exit).toHaveBeenCalledTimes(0)
     })
 
     afterEach(() => {

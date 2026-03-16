@@ -5,8 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import cli from '../src/cli.js'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const localCDDL = path.join(__dirname, '..', 'examples', 'webdriver', 'local.cddl')
-const remoteCDDL = path.join(__dirname, '..', 'examples', 'webdriver', 'remote.cddl')
+const localCDDL = path.join(__dirname, '__fixtures__', 'unknown.cddl')
 
 vi.mock('../src/constants', () => ({
     pkg: {
@@ -15,7 +14,7 @@ vi.mock('../src/constants', () => ({
     }
 }))
 
-describe('webdriver examples', () => {
+describe('unknown option', () => {
     let exitOrig = process.exit
     let logOrig = console.log
     let errorOrig = console.error
@@ -32,23 +31,21 @@ describe('webdriver examples', () => {
         console.error = errorOrig
     })
 
-    it('should generate types for local.cddl', async () => {
+    it('should use unknown instead of any', async () => {
         await cli([localCDDL, '--unknown-as-any'])
 
-        expect(process.exit).not.toHaveBeenCalledWith(1)
-        expect(console.error).not.toHaveBeenCalled()
-        expect(console.log).toHaveBeenCalled()
         const output = vi.mocked(console.log).mock.calls.flat().join('\n')
-        expect(output).toMatchSnapshot()
+        expect(output).toContain('export type Foo = unknown;')
+        expect(output).toContain('export type Bar = unknown[];')
+        expect(output).toContain('export type Baz = Record<string, unknown>;')
     })
 
-    it('should generate types for remote.cddl', async () => {
-        await cli([remoteCDDL, '--unknown-as-any'])
+    it('should default to any', async () => {
+        await cli([localCDDL])
 
-        expect(process.exit).not.toHaveBeenCalledWith(1)
-        expect(console.error).not.toHaveBeenCalled()
-        expect(console.log).toHaveBeenCalled()
         const output = vi.mocked(console.log).mock.calls.flat().join('\n')
-        expect(output).toMatchSnapshot()
+        expect(output).toContain('export type Foo = any;')
+        expect(output).toContain('export type Bar = any[];')
+        expect(output).toContain('export type Baz = Record<string, any>;')
     })
 })

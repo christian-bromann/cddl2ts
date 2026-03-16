@@ -92,7 +92,7 @@ export interface SomeGroup {
   pointerType?: InputPointerType;
 }
 
-export type ScriptListLocalValue = (ScriptLocalValue)[];
+export type ScriptListLocalValue = ScriptLocalValue[];
 export type ScriptMappingLocalValue = (ScriptLocalValue | ScriptLocalValue)[];
 
 export // some comments here

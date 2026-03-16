@@ -24,7 +24,17 @@ type ObjectEntry = types.namedTypes.TSCallSignatureDeclaration | types.namedType
 type ObjectBody = ObjectEntry[]
 type TSTypeKind = types.namedTypes.TSAsExpression['typeAnnotation']
 
-export function transform (assignments: Assignment[]) {
+export interface TransformOptions {
+    useUnknown?: boolean
+}
+
+export function transform (assignments: Assignment[], options?: TransformOptions) {
+    if (options?.useUnknown) {
+        NATIVE_TYPES.any = b.tsUnknownKeyword()
+    } else {
+        NATIVE_TYPES.any = b.tsAnyKeyword()
+    }
+
     let ast = parse(
         `// compiled with https://www.npmjs.com/package/cddl2ts v${pkg.version}`,
         {
@@ -182,9 +192,13 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             ? firstType.map(parseUnionType)
             : (firstType as any).Values
                 ? (firstType as any).Values.map((val: any) => parseUnionType(val.Type[0]))
-                // ToDo(Christian): transpile this case correctly
-                : []
-        const value = b.tsArrayType(b.tsParenthesizedType(b.tsUnionType(obj)))
+                : [parseUnionType(firstType)]
+        
+        const value = b.tsArrayType(
+            obj.length === 1
+                ? obj[0]
+                : b.tsParenthesizedType(b.tsUnionType(obj))
+        )
         const expr = b.tsTypeAliasDeclaration(id, value)
         expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
         return b.exportDeclaration(false, expr)
@@ -292,16 +306,22 @@ function parseUnionType (t: PropertyType | Assignment): TSTypeKind {
     } else if (t.Type === 'array') {
         const types = ((t as Array).Values[0] as Property).Type as PropertyType[]
         const typedTypes = (Array.isArray(types) ? types : [types]).map((val) => {
-            return typeof val === 'string' && NATIVE_TYPES[val]
-                ? NATIVE_TYPES[val]
-                : b.tsTypeReference(
-                    b.identifier(camelcase((val as any).Value as string, { pascalCase: true }))
-                )
+            if (typeof val === 'string' && NATIVE_TYPES[val]) {
+                return NATIVE_TYPES[val]
+            }
+            return b.tsTypeReference(
+                b.identifier(camelcase((val as any).Value as string, { pascalCase: true }))
+            )
         })
 
-        return b.tsArrayType(typedTypes.length > 1
-            ? b.tsParenthesizedType(b.tsUnionType(typedTypes))
-            : b.tsUnionType(typedTypes))
+        if (typedTypes.length > 1) {
+            return b.tsArrayType(b.tsParenthesizedType(b.tsUnionType(typedTypes)))
+        }
+
+        if (!typedTypes[0]) {
+             console.log('typedTypes[0] is missing!', types, typedTypes);
+        }
+        return b.tsArrayType(typedTypes[0])
     } else if (typeof t.Type === 'object' && ((t as NativeTypeWithOperator).Type as PropertyReference).Type === 'range') {
         return b.tsNumberKeyword()
     } else if (typeof t.Type === 'object' && ((t as NativeTypeWithOperator).Type as PropertyReference).Type === 'group') {
