@@ -179,34 +179,58 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             return b.exportDeclaration(false, expr)
         }
 
-        const extendInterfaces = (assignment.Properties as Property[])
+        // Check if extended interfaces are likely unions or conflicting types
+        // In CDDL, including a group (Name '') that is defined elsewhere as a choice (union)
+        // is valid, but TypeScript interfaces cannot extend unions.
+        // We can't easily know if the referenced group is a union without a symbol table or 2-pass.
+        // However, if we simply use type intersection for ALL group inclusions, it is always safe.
+        // (Interface extending Interface is same as Type = Interface & Interface)
+        // Let's refactor to use Type Alias with Intersection if there are any mixins.
+        
+        const mixins = (assignment.Properties as Property[])
             .filter((prop: Property) => prop.Name === '')
-            .map((prop: Property) => {
-                const propType = prop.Type as PropertyType[]
+        
+        if (mixins.length > 0) {
+            // It has mixins (extensions). Use type alias with intersection to be safe against unions.
+            // Type = (Mixin1 & Mixin2 & { OwnProps })
+            
+            const intersections: any[] = []
+            
+            for (const mixin of mixins) {
+                const propType = mixin.Type as PropertyType[]
                 const groupRef = propType[0] as PropertyReference
-
-                // Handle nested groups (e.g. choices inside a group)
-                if (Array.isArray((prop.Type as any).Properties)) {
-                     // This is an inline group definition or choice structure that recast cannot extend directly
-                     // We might need to add these as properties instead of extends?
-                     // returning any here to prevent crash for now, but really we should merge these properties
-                     return null
-                }
-
+                
+                // Handle nested inline groups if any (though usually flat here if name is empty?)
                 const value = (groupRef?.Value || (groupRef as any)?.Type) as string
-                if (!value) {
-                     return null
+                if (value) {
+                     intersections.push(
+                         b.tsTypeReference(b.identifier(camelcase(value, { pascalCase: true })))
+                     )
                 }
-                return b.tsExpressionWithTypeArguments(
-                    b.identifier(camelcase(value, { pascalCase: true }))
-                )
-            })
-            .filter(Boolean) as types.namedTypes.TSExpressionWithTypeArguments[]
+            }
+            
+            const ownProps = (assignment.Properties as Property[]).filter(p => p.Name !== '')
+            if (ownProps.length > 0) {
+                 intersections.push(b.tsTypeLiteral(parseObjectType(ownProps)))
+            }
+            
+            let value: any
+            if (intersections.length === 1) {
+                value = intersections[0]
+            } else {
+                value = b.tsIntersectionType(intersections)
+            }
+            
+            const expr = b.tsTypeAliasDeclaration(id, value)
+            expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
+            return b.exportDeclaration(false, expr)
+        }
+
+        // Fallback to interface if no mixins (pure object)
         const props = assignment.Properties as Property[]
         const objectType = parseObjectType(props)
 
         const expr = b.tsInterfaceDeclaration(id, b.tsInterfaceBody(objectType))
-        expr.extends = extendInterfaces
         expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
         return b.exportDeclaration(false, expr)
     }

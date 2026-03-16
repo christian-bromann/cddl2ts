@@ -38,14 +38,14 @@ describe('cddl2ts', () => {
         expect(process.exit).toHaveBeenCalledWith(0)
     })
 
-    it('should print version', async () => {
+    it('should print version (alias)', async () => {
         await cli(['foo', '-v', 'bar'])
 
         expect(console.log).toHaveBeenCalledWith('1.2.3')
         expect(process.exit).toHaveBeenCalledWith(0)
     })
 
-    it('should print version', async () => {
+    it('should print version (long flag)', async () => {
         await cli(['foo', '--version', 'bar'])
 
         expect(console.log).toHaveBeenCalledWith('1.2.3')
@@ -59,7 +59,7 @@ describe('cddl2ts', () => {
         expect(process.exit).toHaveBeenCalledWith(1)
     })
 
-    it('should fail if first parameter is not pointing to a file', async () => {
+    it('should generate correct types for test.cddl', async () => {
         await cli([path.join(__dirname, '__fixtures__', 'test.cddl')])
 
         expect(vi.mocked(console.log).mock.calls).toMatchSnapshot()

@@ -43,10 +43,12 @@ describe('group choice conversion', () => {
         expect(output).toContain('export type ProxyConfiguration = AutodetectProxyConfiguration | DirectProxyConfiguration | ManualProxyConfiguration')
 
         // Verify interfaces are generated comfortably
-        expect(output).toContain('export interface AutodetectProxyConfiguration extends Extensible {')
-        expect(output).toContain('export interface DirectProxyConfiguration extends Extensible {')
-        expect(output).toContain('export interface ManualProxyConfiguration extends Extensible {')
-
+        // Note: As we now use Type Alias intersections for mixins instead of interfaces extends to support union mixins,
+        // these assertions are updated to expect type aliases.
+        expect(output).toContain('export type AutodetectProxyConfiguration = Extensible & {')
+        expect(output).toContain('export type DirectProxyConfiguration = Extensible & {')
+        expect(output).toContain('export type ManualProxyConfiguration = Extensible & {')
+        
         expect(output).toMatchSnapshot()
     })
 })

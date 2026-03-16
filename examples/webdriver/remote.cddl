@@ -1500,12 +1500,6 @@ InputCommand = (
   input.SetFiles
 )
 
-InputResult = (
-  input.PerformActionsResult /
-  input.ReleaseActionsResult /
-  input.SetFilesResult
-)
-
 input.ElementOrigin = {
   type: "element",
   element: script.SharedReference

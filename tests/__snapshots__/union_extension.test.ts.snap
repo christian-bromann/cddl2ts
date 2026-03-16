@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`union extension > should generate an intersection type instead of interface extends when extending a union 1`] = `
+"export type Extensible = Record<string, unknown>;
+export type Event = EventData & Extensible;
+export type EventData = MouseEvent | KeyboardEvent;
+
+export interface MouseEvent {
+  type: "mouse";
+  x: Number;
+  y: Number;
+}
+
+export interface KeyboardEvent {
+  type: "key";
+  code: Number;
+}"
+`;

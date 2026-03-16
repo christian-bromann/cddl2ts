@@ -4,15 +4,15 @@ exports[`group choice conversion > should generate a union type for multiple gro
 "export type Extensible = Record<string, unknown>;
 export type ProxyConfiguration = AutodetectProxyConfiguration | DirectProxyConfiguration | ManualProxyConfiguration;
 
-export interface AutodetectProxyConfiguration extends Extensible {
+export type AutodetectProxyConfiguration = Extensible & {
   proxyType: "autodetect";
-}
+};
 
-export interface DirectProxyConfiguration extends Extensible {
+export type DirectProxyConfiguration = Extensible & {
   proxyType: "direct";
-}
+};
 
-export interface ManualProxyConfiguration extends Extensible {
+export type ManualProxyConfiguration = Extensible & {
   proxyType: "manual";
-}"
+};"
 `;

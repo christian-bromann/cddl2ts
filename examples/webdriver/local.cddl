@@ -1303,6 +1303,11 @@ log.EntryAdded = (
  params: log.Entry,
 )
 
+InputResult = (
+  input.PerformActionsResult //
+  input.ReleaseActionsResult //
+  input.SetFilesResult
+)
 
 InputEvent = (
   input.FileDialogOpened

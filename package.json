@@ -30,7 +30,10 @@
     "release:patch": "npm run release -- patch",
     "release:minor": "npm run release -- minor",
     "release:major": "npm run release -- major",
-    "test": "vitest",
+    "generate:local": "npm run compile && node ./bin/cddl2ts.js ./examples/webdriver/local.cddl --unknown-as-any > ./examples/webdriver/local.ts && tsc -p ./examples/webdriver/tsconfig.json",
+    "generate:remote": "npm run compile && node ./bin/cddl2ts.js ./examples/webdriver/remote.cddl --unknown-as-any > ./examples/webdriver/remote.ts && tsc -p ./examples/webdriver/tsconfig.json",
+    "generate:examples": "npm run generate:local && npm run generate:remote",
+    "test": "vitest run && npm run generate:examples",
     "watch": "tsc --watch",
     "postinstall": "patch-package"
   },
