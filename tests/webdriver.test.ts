@@ -33,7 +33,7 @@ describe('webdriver examples', () => {
     })
 
     it('should generate types for local.cddl', async () => {
-        await cli([localCDDL, '--unknown-as-any'])
+        await cli([localCDDL, '--unknown-as-any', '--indentation', '4'])
 
         expect(process.exit).not.toHaveBeenCalledWith(1)
         expect(console.error).not.toHaveBeenCalled()
@@ -43,7 +43,7 @@ describe('webdriver examples', () => {
     })
 
     it('should generate types for remote.cddl', async () => {
-        await cli([remoteCDDL, '--unknown-as-any'])
+        await cli([remoteCDDL, '--unknown-as-any', '--indentation', '4'])
 
         expect(process.exit).not.toHaveBeenCalledWith(1)
         expect(console.error).not.toHaveBeenCalled()

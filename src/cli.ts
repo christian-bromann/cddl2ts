@@ -19,6 +19,12 @@ export default async function cli (argv = process.argv.slice(2)) {
             description: 'Use unknown instead of any',
             default: false
         })
+        .option('i', {
+            alias: 'indentation',
+            type: 'number',
+            description: 'Number of spaces for indentation',
+            default: 2
+        })
         .help('help')
         .alias('h', 'help')
         .alias('v', 'version')
@@ -39,5 +45,8 @@ export default async function cli (argv = process.argv.slice(2)) {
     }
 
     const ast = parse(absoluteFilePath)
-    console.log(transform(ast, { useUnknown: args.u as boolean }))
+    console.log(transform(ast, {
+        useUnknown: args.u as boolean,
+        indentation: args.i as number
+    }))
 }

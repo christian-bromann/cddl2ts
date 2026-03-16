@@ -26,6 +26,7 @@ type TSTypeKind = types.namedTypes.TSAsExpression['typeAnnotation']
 
 export interface TransformOptions {
     useUnknown?: boolean
+    indentation?: number
 }
 
 export function transform (assignments: Assignment[], options?: TransformOptions) {
@@ -51,7 +52,7 @@ export function transform (assignments: Assignment[], options?: TransformOptions
         }
         ast.program.body.push(statement)
     }
-    return print(ast).code
+    return print(ast, { tabWidth: options?.indentation || 2 }).code
 }
 
 function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
