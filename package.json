@@ -31,7 +31,8 @@
     "release:minor": "npm run release -- minor",
     "release:major": "npm run release -- major",
     "test": "vitest",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
@@ -45,7 +46,8 @@
   "dependencies": {
     "@babel/parser": "^7.27.0",
     "camelcase": "^8.0.0",
-    "cddl": "^0.8.5",
+    "cddl": "^0.12.0",
+    "patch-package": "^8.0.1",
     "recast": "^0.23.11",
     "yargs": "^17.7.2"
   }

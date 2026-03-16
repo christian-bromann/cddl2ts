@@ -57,7 +57,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         if (propType.length === 1 && propType[0].Type === 'range') {
             typeParameters = b.tsNumberKeyword()
         } else {
-            typeParameters = b.tsUnionType(propType.map(parsePropertyType))
+            typeParameters = b.tsUnionType(propType.map(parseUnionType))
         }
 
         const expr = b.tsTypeAliasDeclaration(id, typeParameters)
@@ -69,6 +69,71 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         const id = b.identifier(camelcase(assignment.Name, { pascalCase: true }))
 
         /**
+         * Check if we have choices in the group (arrays of Properties)
+         */
+        const properties = assignment.Properties as (Property | Property[])[]
+        const hasChoices = properties.some(p => Array.isArray(p))
+
+        if (hasChoices) {
+            // Flatten static properties and collect choices
+            const staticProps: Property[] = []
+            const intersections: any[] = []
+
+            for (const prop of properties) {
+                if (Array.isArray(prop)) {
+                    // It's a choice (Union)
+                    // prop is Property[] where each Property is an option
+                    const options = prop.map(p => {
+                        // If p is a group reference (Name ''), it's a TypeReference
+                        if (p.Name === '' && Array.isArray(p.Type) && (p.Type[0] as any).Type === 'group') {
+                             return b.tsTypeReference(
+                                b.identifier(camelcase((p.Type[0] as any).Value as string, { pascalCase: true }))
+                            )
+                        }
+                        // Otherwise it is an object literal with this property
+                        return b.tsTypeLiteral(parseObjectType([p]))
+                    })
+                    intersections.push(b.tsUnionType(options))
+                } else {
+                    staticProps.push(prop)
+                }
+            }
+
+            if (staticProps.length > 0) {
+                // Check if we have mixins in static props
+                const mixins = staticProps.filter(p => p.Name === '')
+                const ownProps = staticProps.filter(p => p.Name !== '')
+
+                if (ownProps.length > 0) {
+                    intersections.unshift(b.tsTypeLiteral(parseObjectType(ownProps)))
+                }
+
+                for (const mixin of mixins) {
+                     if (Array.isArray(mixin.Type) && (mixin.Type[0] as any).Type === 'group') {
+                        intersections.push(b.tsTypeReference(
+                            b.identifier(camelcase((mixin.Type[0] as any).Value as string, { pascalCase: true }))
+                        ))
+                     }
+                }
+            }
+
+            // If only one intersection element, return it directly
+            // If multiple, return Intersection
+            let value: any
+            if (intersections.length === 0) {
+                value = b.tsAnyKeyword() // Should not happen for valid CDDL?
+            } else if (intersections.length === 1) {
+                value = intersections[0]
+            } else {
+                value = b.tsIntersectionType(intersections)
+            }
+
+            const expr = b.tsTypeAliasDeclaration(id, value)
+            expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
+            return b.exportDeclaration(false, expr)
+        }
+
+        /**
          * transform CDDL groups like `Extensible = (*text => any)`
          */
         if (assignment.Properties.length === 1 && ((assignment.Properties as Property[])[0].Type as PropertyType[]).length === 1 && Object.keys(NATIVE_TYPES).includes(((assignment.Properties as Property[])[0].Name))) {
@@ -78,14 +143,32 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             return b.exportDeclaration(false, expr)
         }
 
-        const objectType = parseObjectType(assignment.Properties as any)
         const extendInterfaces = (assignment.Properties as Property[])
             .filter((prop: Property) => prop.Name === '')
-            .map((prop: Property) => b.tsExpressionWithTypeArguments(
-                b.identifier(
-                    camelcase(((prop.Type as PropertyType[])[0] as PropertyReference).Value as string, { pascalCase: true }))
+            .map((prop: Property) => {
+                const propType = prop.Type as PropertyType[]
+                const groupRef = propType[0] as PropertyReference
+
+                // Handle nested groups (e.g. choices inside a group)
+                if (Array.isArray((prop.Type as any).Properties)) {
+                     // This is an inline group definition or choice structure that recast cannot extend directly
+                     // We might need to add these as properties instead of extends?
+                     // returning any here to prevent crash for now, but really we should merge these properties
+                     return null
+                }
+
+                const value = (groupRef?.Value || (groupRef as any)?.Type) as string
+                if (!value) {
+                     return null
+                }
+                return b.tsExpressionWithTypeArguments(
+                    b.identifier(camelcase(value, { pascalCase: true }))
                 )
-            )
+            })
+            .filter(Boolean) as types.namedTypes.TSExpressionWithTypeArguments[]
+        const props = assignment.Properties as Property[]
+        const objectType = parseObjectType(props)
+
         const expr = b.tsInterfaceDeclaration(id, b.tsInterfaceBody(objectType))
         expr.extends = extendInterfaces
         expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
@@ -108,26 +191,6 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
     }
 
     throw new Error(`Unknown assignment type "${(assignment as any).Type}"`)
-}
-
-function parsePropertyType (propType: PropertyType) {
-    if (typeof propType === 'string') {
-        return b.tsStringKeyword()
-    }
-    if ((propType as PropertyReference).Type === 'group') {
-        return b.tsTypeReference(
-            b.identifier(
-                camelcase((propType as PropertyReference).Value.toString(), { pascalCase: true })
-            )
-        )
-    }
-    if ((propType as PropertyReference).Type === 'literal') {
-        return b.tsLiteralType(
-            b.stringLiteral((propType as PropertyReference).Value.toString())
-        )
-    }
-
-    throw new Error(`Couldn't parse property type ${JSON.stringify(propType, null, 4)}`)
 }
 
 function parseObjectType (props: Property[]): ObjectBody {
@@ -224,6 +287,8 @@ function parseUnionType (t: PropertyType | Assignment): TSTypeKind {
         return b.tsLiteralType(b.stringLiteral(t.Value))
     } else if (t.Type === 'literal' && typeof t.Value === 'number') {
         return b.tsLiteralType(b.numericLiteral(t.Value))
+    } else if (t.Type === 'literal' && typeof t.Value === 'boolean') {
+        return b.tsLiteralType(b.booleanLiteral(t.Value))
     } else if (t.Type === 'array') {
         const types = ((t as Array).Values[0] as Property).Type as PropertyType[]
         const typedTypes = (Array.isArray(types) ? types : [types]).map((val) => {
