@@ -45,7 +45,7 @@ export interface SessionCapabilityRequest extends Extensible {
   unhandledPromptBehavior?: SessionUserPromptHandler;
 }
 
-export type SessionProxyConfiguration = {} | {} | {} | {} & SessionSystemProxyConfiguration;
+export type SessionProxyConfiguration = SessionAutodetectProxyConfiguration | SessionDirectProxyConfiguration | SessionManualProxyConfiguration | SessionPacProxyConfiguration | SessionSystemProxyConfiguration;
 
 export interface SessionAutodetectProxyConfiguration extends Extensible {
   proxyType: "autodetect";
@@ -1041,7 +1041,7 @@ export interface SessionCapabilityRequest extends Extensible {
   unhandledPromptBehavior?: SessionUserPromptHandler;
 }
 
-export type SessionProxyConfiguration = {} | {} | {} | {} & SessionSystemProxyConfiguration;
+export type SessionProxyConfiguration = SessionAutodetectProxyConfiguration | SessionDirectProxyConfiguration | SessionManualProxyConfiguration | SessionPacProxyConfiguration | SessionSystemProxyConfiguration;
 
 export interface SessionAutodetectProxyConfiguration extends Extensible {
   proxyType: "autodetect";

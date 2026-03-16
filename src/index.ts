@@ -89,15 +89,28 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             const staticProps: Property[] = []
             const intersections: any[] = []
 
-            for (const prop of properties) {
+            for (let i = 0; i < properties.length; i++) {
+                const prop = properties[i]
                 if (Array.isArray(prop)) {
                     // It's a choice (Union)
                     // prop is Property[] where each Property is an option
-                    const options = prop.map(p => {
+                    // CDDL parser appends the last choice element as a subsequent property
+                    // so we need to grab it and merge it into the union
+                    const choiceOptions = [...prop]
+                    if (properties[i + 1] && !Array.isArray(properties[i + 1])) {
+                        choiceOptions.push(properties[i + 1] as Property)
+                        i++ // Skip next property
+                    }
+
+                    const options = choiceOptions.map(p => {
                         // If p is a group reference (Name ''), it's a TypeReference
-                        if (p.Name === '' && Array.isArray(p.Type) && (p.Type[0] as any).Type === 'group') {
+                        // e.g. SessionAutodetectProxyConfiguration // SessionDirectProxyConfiguration
+                        // The parser sometimes wraps it in an array, sometimes not (if inside a choice)
+                        const typeVal = Array.isArray(p.Type) ? p.Type[0] : p.Type
+
+                        if (p.Name === '' && (typeVal as any).Type === 'group') {
                              return b.tsTypeReference(
-                                b.identifier(camelcase((p.Type[0] as any).Value as string, { pascalCase: true }))
+                                b.identifier(camelcase((typeVal as any).Value as string, { pascalCase: true }))
                             )
                         }
                         // Otherwise it is an object literal with this property
@@ -105,7 +118,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
                     })
                     intersections.push(b.tsUnionType(options))
                 } else {
-                    staticProps.push(prop)
+                    staticProps.push(prop as Property)
                 }
             }
 
@@ -119,11 +132,24 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
                 }
 
                 for (const mixin of mixins) {
-                     if (Array.isArray(mixin.Type) && (mixin.Type[0] as any).Type === 'group') {
-                        intersections.push(b.tsTypeReference(
-                            b.identifier(camelcase((mixin.Type[0] as any).Value as string, { pascalCase: true }))
-                        ))
-                     }
+                    if (Array.isArray(mixin.Type) && mixin.Type.length > 1) {
+                         const options = mixin.Type.map(t => {
+                             if ((t as any).Type === 'group') {
+                                 return b.tsTypeReference(
+                                     b.identifier(camelcase((t as any).Value as string, { pascalCase: true }))
+                                 )
+                             }
+                             throw new Error(`Unexpected type in mixin union: ${JSON.stringify(t)}`)
+                         })
+                         intersections.push(b.tsUnionType(options))
+                    } else {
+                        const typeVal = Array.isArray(mixin.Type) ? mixin.Type[0] : mixin.Type
+                        if ((typeVal as any).Type === 'group') {
+                            intersections.push(b.tsTypeReference(
+                                b.identifier(camelcase((typeVal as any).Value as string, { pascalCase: true }))
+                            ))
+                        }
+                    }
                 }
             }
 
@@ -193,7 +219,7 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             : (firstType as any).Values
                 ? (firstType as any).Values.map((val: any) => parseUnionType(val.Type[0]))
                 : [parseUnionType(firstType)]
-        
+
         const value = b.tsArrayType(
             obj.length === 1
                 ? obj[0]

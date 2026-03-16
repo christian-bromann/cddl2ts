@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`group choice conversion > should generate a union type for multiple group choices 1`] = `
+"export type Extensible = Record<string, unknown>;
+export type ProxyConfiguration = AutodetectProxyConfiguration | DirectProxyConfiguration | ManualProxyConfiguration;
+
+export interface AutodetectProxyConfiguration extends Extensible {
+  proxyType: "autodetect";
+}
+
+export interface DirectProxyConfiguration extends Extensible {
+  proxyType: "direct";
+}
+
+export interface ManualProxyConfiguration extends Extensible {
+  proxyType: "manual";
+}"
+`;

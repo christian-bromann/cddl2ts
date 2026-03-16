@@ -1,0 +1,22 @@
+Extensible = (*text => any)
+
+ProxyConfiguration = {
+   AutodetectProxyConfiguration //
+   DirectProxyConfiguration //
+   ManualProxyConfiguration
+}
+
+AutodetectProxyConfiguration = (
+   proxyType: "autodetect",
+   Extensible
+)
+
+DirectProxyConfiguration = (
+   proxyType: "direct",
+   Extensible
+)
+
+ManualProxyConfiguration = (
+   proxyType: "manual",
+   Extensible
+)
