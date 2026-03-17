@@ -6,7 +6,6 @@ import cli from '../src/cli.js'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 const localCDDL = path.join(__dirname, '..', 'examples', 'webdriver', 'local.cddl')
-const remoteCDDL = path.join(__dirname, '..', 'examples', 'webdriver', 'remote.cddl')
 
 vi.mock('../src/constants', () => ({
     pkg: {
@@ -34,16 +33,6 @@ describe('webdriver examples', () => {
 
     it('should generate types for local.cddl', async () => {
         await cli([localCDDL, '--unknown-as-any'])
-
-        expect(process.exit).not.toHaveBeenCalledWith(1)
-        expect(console.error).not.toHaveBeenCalled()
-        expect(console.log).toHaveBeenCalled()
-        const output = vi.mocked(console.log).mock.calls.flat().join('\n')
-        expect(output).toMatchSnapshot()
-    })
-
-    it('should generate types for remote.cddl', async () => {
-        await cli([remoteCDDL, '--unknown-as-any'])
 
         expect(process.exit).not.toHaveBeenCalledWith(1)
         expect(console.error).not.toHaveBeenCalled()

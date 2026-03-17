@@ -33,12 +33,13 @@
     "generate:local": "npm run compile && node ./bin/cddl2ts.js ./examples/webdriver/local.cddl --unknown-as-any > ./examples/webdriver/local.ts && tsc -p ./examples/webdriver/tsconfig.json",
     "generate:remote": "npm run compile && node ./bin/cddl2ts.js ./examples/webdriver/remote.cddl --unknown-as-any > ./examples/webdriver/remote.ts && tsc -p ./examples/webdriver/tsconfig.json",
     "generate:examples": "npm run generate:local && npm run generate:remote",
-    "test": "vitest run && npm run generate:examples",
+    "test": "vitest run",
     "watch": "tsc --watch",
+    "checks:all": "npm run compile && npm run test && npm run generate:examples",
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/yargs": "^17.0.35",
     "@types/node": "^24.12.0",
     "@vitest/coverage-v8": "^4.1.0",
     "npm-run-all": "^4.1.5",
@@ -49,7 +50,7 @@
   "dependencies": {
     "@babel/parser": "^7.29.0",
     "camelcase": "^9.0.0",
-    "cddl": "^0.12.0",
+    "cddl": "^0.13.0",
     "patch-package": "^8.0.1",
     "recast": "^0.23.11",
     "yargs": "^18.0.0"
