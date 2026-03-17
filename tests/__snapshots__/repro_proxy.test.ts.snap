@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`repro proxy > should generate correct output for ProxyConfiguration 1`] = `
+"export type Extensible = Record<string, unknown>;
+export type ProxyConfiguration = AutodetectProxyConfiguration | DirectProxyConfiguration;
+
+export interface AutodetectProxyConfiguration extends Extensible {
+  proxyType: "autodetect";
+}
+
+export interface DirectProxyConfiguration extends Extensible {
+  proxyType: "direct";
+}"
+`;

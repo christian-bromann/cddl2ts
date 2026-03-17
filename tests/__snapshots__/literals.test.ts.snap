@@ -1,0 +1,8 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`literals > should support bigint and null literals 1`] = `
+"export interface LiteralTest {
+  bigInt: 9007199254740996;
+  nullVal: null;
+}"
+`;

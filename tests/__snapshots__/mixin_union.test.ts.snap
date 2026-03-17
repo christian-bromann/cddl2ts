@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mixin union types > should generate union type aliases for mixin choices 1`] = `
+"export type Mixins = MixinA & MixinB;
+
+export interface MixinA {
+  a: number;
+}
+
+export interface MixinB {
+  b: string;
+}
+
+export type UnionMixin = MixinA | MixinB;
+
+export type ComplexMixins = (MixinA | MixinB) & {
+  c: boolean;
+};"
+`;

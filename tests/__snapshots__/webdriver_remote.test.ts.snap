@@ -1,0 +1,1530 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`webdriver examples > should generate types for remote.cddl 1`] = `
+"export type Command = CommandData & Extensible & {
+  id: JsUint;
+};
+
+export type CommandData = BrowserCommand | BrowsingContextCommand | EmulationCommand | InputCommand | NetworkCommand | ScriptCommand | SessionCommand | StorageCommand | WebExtensionCommand;
+export type EmptyParams = Extensible;
+export type Extensible = Record<string, unknown>;
+export type JsInt = number;
+export type JsUint = number;
+export type SessionCommand = SessionEnd | SessionNew | SessionStatus | SessionSubscribe | SessionUnsubscribe;
+
+export interface SessionCapabilitiesRequest {
+  alwaysMatch?: SessionCapabilityRequest;
+  firstMatch?: SessionCapabilityRequest[];
+}
+
+export type SessionCapabilityRequest = Extensible & {
+  acceptInsecureCerts?: boolean;
+  browserName?: string;
+  browserVersion?: string;
+  platformName?: string;
+  proxy?: SessionProxyConfiguration;
+  unhandledPromptBehavior?: SessionUserPromptHandler;
+};
+
+export type SessionProxyConfiguration = SessionAutodetectProxyConfiguration | SessionDirectProxyConfiguration | SessionManualProxyConfiguration | SessionPacProxyConfiguration | SessionSystemProxyConfiguration;
+
+export type SessionAutodetectProxyConfiguration = Extensible & {
+  proxyType: "autodetect";
+};
+
+export type SessionDirectProxyConfiguration = Extensible & {
+  proxyType: "direct";
+};
+
+export type SessionManualProxyConfiguration = SessionSocksProxyConfiguration & Extensible & {
+  proxyType: "manual";
+  httpProxy?: string;
+  sslProxy?: string;
+  noProxy?: string[];
+};
+
+export interface SessionSocksProxyConfiguration {
+  socksProxy: string;
+  socksVersion: number;
+}
+
+export type SessionPacProxyConfiguration = Extensible & {
+  proxyType: "pac";
+  proxyAutoconfigUrl: string;
+};
+
+export type SessionSystemProxyConfiguration = Extensible & {
+  proxyType: "system";
+};
+
+export interface SessionUserPromptHandler {
+  alert?: SessionUserPromptHandlerType;
+  beforeUnload?: SessionUserPromptHandlerType;
+  confirm?: SessionUserPromptHandlerType;
+  default?: SessionUserPromptHandlerType;
+  file?: SessionUserPromptHandlerType;
+  prompt?: SessionUserPromptHandlerType;
+}
+
+export type SessionUserPromptHandlerType = "accept" | "dismiss" | "ignore";
+export type SessionSubscription = string;
+
+export interface SessionSubscribeParameters {
+  events: string[];
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface SessionUnsubscribeByIdRequest {
+  subscriptions: SessionSubscription[];
+}
+
+export interface SessionUnsubscribeByAttributesRequest {
+  events: string[];
+}
+
+export interface SessionStatus {
+  method: "session.status";
+  params: EmptyParams;
+}
+
+export interface SessionNew {
+  method: "session.new";
+  params: SessionNewParameters;
+}
+
+export interface SessionNewParameters {
+  capabilities: SessionCapabilitiesRequest;
+}
+
+export interface SessionEnd {
+  method: "session.end";
+  params: EmptyParams;
+}
+
+export interface SessionSubscribe {
+  method: "session.subscribe";
+  params: SessionSubscribeParameters;
+}
+
+export interface SessionUnsubscribe {
+  method: "session.unsubscribe";
+  params: SessionUnsubscribeParameters;
+}
+
+export type SessionUnsubscribeParameters = SessionUnsubscribeByAttributesRequest | SessionUnsubscribeByIdRequest;
+export type BrowserCommand = BrowserClose | BrowserCreateUserContext | BrowserGetClientWindows | BrowserGetUserContexts | BrowserRemoveUserContext | BrowserSetClientWindowState | BrowserSetDownloadBehavior;
+export type BrowserClientWindow = string;
+
+export interface BrowserClientWindowInfo {
+  active: boolean;
+  clientWindow: BrowserClientWindow;
+  height: JsUint;
+  state: "fullscreen" | "maximized" | "minimized" | "normal";
+  width: JsUint;
+  x: JsInt;
+  y: JsInt;
+}
+
+export type BrowserUserContext = string;
+
+export interface BrowserUserContextInfo {
+  userContext: BrowserUserContext;
+}
+
+export interface BrowserClose {
+  method: "browser.close";
+  params: EmptyParams;
+}
+
+export interface BrowserCreateUserContext {
+  method: "browser.createUserContext";
+  params: BrowserCreateUserContextParameters;
+}
+
+export interface BrowserCreateUserContextParameters {
+  acceptInsecureCerts?: boolean;
+  proxy?: SessionProxyConfiguration;
+  unhandledPromptBehavior?: SessionUserPromptHandler;
+}
+
+export interface BrowserGetClientWindows {
+  method: "browser.getClientWindows";
+  params: EmptyParams;
+}
+
+export interface BrowserGetUserContexts {
+  method: "browser.getUserContexts";
+  params: EmptyParams;
+}
+
+export interface BrowserRemoveUserContext {
+  method: "browser.removeUserContext";
+  params: BrowserRemoveUserContextParameters;
+}
+
+export interface BrowserRemoveUserContextParameters {
+  userContext: BrowserUserContext;
+}
+
+export interface BrowserSetClientWindowState {
+  method: "browser.setClientWindowState";
+  params: BrowserSetClientWindowStateParameters;
+}
+
+export type BrowserSetClientWindowStateParameters = (BrowserClientWindowNamedState | BrowserClientWindowRectState) & {
+  clientWindow: BrowserClientWindow;
+};
+
+export interface BrowserClientWindowNamedState {
+  state: "fullscreen" | "maximized" | "minimized";
+}
+
+export interface BrowserClientWindowRectState {
+  state: "normal";
+  width?: JsUint;
+  height?: JsUint;
+  x?: JsInt;
+  y?: JsInt;
+}
+
+export interface BrowserSetDownloadBehavior {
+  method: "browser.setDownloadBehavior";
+  params: BrowserSetDownloadBehaviorParameters;
+}
+
+export interface BrowserSetDownloadBehaviorParameters {
+  downloadBehavior: BrowserDownloadBehavior | null;
+  userContexts?: BrowserUserContext[];
+}
+
+export type BrowserDownloadBehavior = (BrowserDownloadBehaviorAllowed | BrowserDownloadBehaviorDenied);
+
+export interface BrowserDownloadBehaviorAllowed {
+  type: "allowed";
+  destinationFolder: string;
+}
+
+export interface BrowserDownloadBehaviorDenied {
+  type: "denied";
+}
+
+export type BrowsingContextCommand = BrowsingContextActivate | BrowsingContextCaptureScreenshot | BrowsingContextClose | BrowsingContextCreate | BrowsingContextGetTree | BrowsingContextHandleUserPrompt | BrowsingContextLocateNodes | BrowsingContextNavigate | BrowsingContextPrint | BrowsingContextReload | BrowsingContextSetBypassCsp | BrowsingContextSetViewport | BrowsingContextTraverseHistory;
+export type BrowsingContextBrowsingContext = string;
+export type BrowsingContextLocator = BrowsingContextAccessibilityLocator | BrowsingContextCssLocator | BrowsingContextContextLocator | BrowsingContextInnerTextLocator | BrowsingContextXPathLocator;
+
+export interface BrowsingContextAccessibilityLocator {
+  type: "accessibility";
+  value: {
+    name?: string;
+    role?: string;
+  };
+}
+
+export interface BrowsingContextCssLocator {
+  type: "css";
+  value: string;
+}
+
+export interface BrowsingContextContextLocator {
+  type: "context";
+  value: {
+    context: BrowsingContextBrowsingContext;
+  };
+}
+
+export interface BrowsingContextInnerTextLocator {
+  type: "innerText";
+  value: string;
+  ignoreCase?: boolean;
+  matchType?: "full" | "partial";
+  maxDepth?: JsUint;
+}
+
+export interface BrowsingContextXPathLocator {
+  type: "xpath";
+  value: string;
+}
+
+export type BrowsingContextNavigation = string;
+export type BrowsingContextReadinessState = "none" | "interactive" | "complete";
+export type BrowsingContextUserPromptType = "alert" | "beforeunload" | "confirm" | "prompt";
+
+export interface BrowsingContextActivate {
+  method: "browsingContext.activate";
+  params: BrowsingContextActivateParameters;
+}
+
+export interface BrowsingContextActivateParameters {
+  context: BrowsingContextBrowsingContext;
+}
+
+export interface BrowsingContextCaptureScreenshot {
+  method: "browsingContext.captureScreenshot";
+  params: BrowsingContextCaptureScreenshotParameters;
+}
+
+export interface BrowsingContextCaptureScreenshotParameters {
+  context: BrowsingContextBrowsingContext;
+  /**
+   * @default 'viewport'
+   */
+  origin?: "viewport" | "document";
+  format?: BrowsingContextImageFormat;
+  clip?: BrowsingContextClipRectangle;
+}
+
+export interface BrowsingContextImageFormat {
+  type: string;
+  quality?: number;
+}
+
+export type BrowsingContextClipRectangle = BrowsingContextBoxClipRectangle | BrowsingContextElementClipRectangle;
+
+export interface BrowsingContextElementClipRectangle {
+  type: "element";
+  element: ScriptSharedReference;
+}
+
+export interface BrowsingContextBoxClipRectangle {
+  type: "box";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface BrowsingContextClose {
+  method: "browsingContext.close";
+  params: BrowsingContextCloseParameters;
+}
+
+export interface BrowsingContextCloseParameters {
+  context: BrowsingContextBrowsingContext;
+  promptUnload?: boolean;
+}
+
+export interface BrowsingContextCreate {
+  method: "browsingContext.create";
+  params: BrowsingContextCreateParameters;
+}
+
+export type BrowsingContextCreateType = "tab" | "window";
+
+export interface BrowsingContextCreateParameters {
+  type: BrowsingContextCreateType;
+  referenceContext?: BrowsingContextBrowsingContext;
+  background?: boolean;
+  userContext?: BrowserUserContext;
+}
+
+export interface BrowsingContextGetTree {
+  method: "browsingContext.getTree";
+  params: BrowsingContextGetTreeParameters;
+}
+
+export interface BrowsingContextGetTreeParameters {
+  maxDepth?: JsUint;
+  root?: BrowsingContextBrowsingContext;
+}
+
+export interface BrowsingContextHandleUserPrompt {
+  method: "browsingContext.handleUserPrompt";
+  params: BrowsingContextHandleUserPromptParameters;
+}
+
+export interface BrowsingContextHandleUserPromptParameters {
+  context: BrowsingContextBrowsingContext;
+  accept?: boolean;
+  userText?: string;
+}
+
+export interface BrowsingContextLocateNodes {
+  method: "browsingContext.locateNodes";
+  params: BrowsingContextLocateNodesParameters;
+}
+
+export interface BrowsingContextLocateNodesParameters {
+  context: BrowsingContextBrowsingContext;
+  locator: BrowsingContextLocator;
+  maxNodeCount?: JsUint;
+  serializationOptions?: ScriptSerializationOptions;
+  startNodes?: ScriptSharedReference[];
+}
+
+export interface BrowsingContextNavigate {
+  method: "browsingContext.navigate";
+  params: BrowsingContextNavigateParameters;
+}
+
+export interface BrowsingContextNavigateParameters {
+  context: BrowsingContextBrowsingContext;
+  url: string;
+  wait?: BrowsingContextReadinessState;
+}
+
+export interface BrowsingContextPrint {
+  method: "browsingContext.print";
+  params: BrowsingContextPrintParameters;
+}
+
+export interface BrowsingContextPrintParameters {
+  context: BrowsingContextBrowsingContext;
+  background?: boolean;
+  margin?: BrowsingContextPrintMarginParameters;
+  /**
+   * @default 'portrait'
+   */
+  orientation?: "portrait" | "landscape";
+  page?: BrowsingContextPrintPageParameters;
+  pageRanges?: (JsUint | string)[];
+  /**
+   * @default 1
+   */
+  scale?: number;
+  /**
+   * @default true
+   */
+  shrinkToFit?: boolean;
+}
+
+export // Minimum size is 1pt x 1pt. Conversion follows from
+// https://www.w3.org/TR/css3-values/#absolute-lengths
+interface BrowsingContextPrintMarginParameters {
+  /**
+   * @default 1
+   */
+  bottom?: number;
+  /**
+   * @default 1
+   */
+  left?: number;
+  /**
+   * @default 1
+   */
+  right?: number;
+  /**
+   * @default 1
+   */
+  top?: number;
+}
+
+export interface BrowsingContextPrintPageParameters {
+  /**
+   * @default 27.94
+   */
+  height?: number;
+  /**
+   * @default 21.59
+   */
+  width?: number;
+}
+
+export interface BrowsingContextReload {
+  method: "browsingContext.reload";
+  params: BrowsingContextReloadParameters;
+}
+
+export interface BrowsingContextReloadParameters {
+  context: BrowsingContextBrowsingContext;
+  ignoreCache?: boolean;
+  wait?: BrowsingContextReadinessState;
+}
+
+export interface BrowsingContextSetBypassCsp {
+  method: "browsingContext.setBypassCSP";
+  params: BrowsingContextSetBypassCspParameters;
+}
+
+export interface BrowsingContextSetBypassCspParameters {
+  bypass: true | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface BrowsingContextSetViewport {
+  method: "browsingContext.setViewport";
+  params: BrowsingContextSetViewportParameters;
+}
+
+export interface BrowsingContextSetViewportParameters {
+  context?: BrowsingContextBrowsingContext;
+  viewport?: BrowsingContextViewport | null;
+  devicePixelRatio?: number | null;
+  userContexts?: BrowserUserContext[];
+}
+
+export interface BrowsingContextViewport {
+  width: JsUint;
+  height: JsUint;
+}
+
+export interface BrowsingContextTraverseHistory {
+  method: "browsingContext.traverseHistory";
+  params: BrowsingContextTraverseHistoryParameters;
+}
+
+export interface BrowsingContextTraverseHistoryParameters {
+  context: BrowsingContextBrowsingContext;
+  delta: JsInt;
+}
+
+export type EmulationCommand = EmulationSetForcedColorsModeThemeOverride | EmulationSetGeolocationOverride | EmulationSetLocaleOverride | EmulationSetNetworkConditions | EmulationSetScreenOrientationOverride | EmulationSetScreenSettingsOverride | EmulationSetScriptingEnabled | EmulationSetScrollbarTypeOverride | EmulationSetTimezoneOverride | EmulationSetTouchOverride | EmulationSetUserAgentOverride;
+
+export interface EmulationSetForcedColorsModeThemeOverride {
+  method: "emulation.setForcedColorsModeThemeOverride";
+  params: EmulationSetForcedColorsModeThemeOverrideParameters;
+}
+
+export interface EmulationSetForcedColorsModeThemeOverrideParameters {
+  theme: EmulationForcedColorsModeTheme | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export type EmulationForcedColorsModeTheme = "light" | "dark";
+
+export interface EmulationSetGeolocationOverride {
+  method: "emulation.setGeolocationOverride";
+  params: EmulationSetGeolocationOverrideParameters;
+}
+
+export type EmulationSetGeolocationOverrideParameters = ({
+  coordinates: EmulationGeolocationCoordinates | null;
+} | {
+  error: EmulationGeolocationPositionError;
+}) & {
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+};
+
+export interface EmulationGeolocationCoordinates {
+  latitude: number;
+  longitude: number;
+  /**
+   * @default 1
+   */
+  accuracy?: number;
+  /**
+   * @default null
+   */
+  altitude?: number | null;
+  /**
+   * @default null
+   */
+  altitudeAccuracy?: number | null;
+  /**
+   * @default null
+   */
+  heading?: number | null;
+  /**
+   * @default null
+   */
+  speed?: number | null;
+}
+
+export interface EmulationGeolocationPositionError {
+  type: "positionUnavailable";
+}
+
+export interface EmulationSetLocaleOverride {
+  method: "emulation.setLocaleOverride";
+  params: EmulationSetLocaleOverrideParameters;
+}
+
+export interface EmulationSetLocaleOverrideParameters {
+  locale: string | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetNetworkConditions {
+  method: "emulation.setNetworkConditions";
+  params: EmulationSetNetworkConditionsParameters;
+}
+
+export interface EmulationSetNetworkConditionsParameters {
+  networkConditions: EmulationNetworkConditions | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export type EmulationNetworkConditions = EmulationNetworkConditionsOffline;
+
+export interface EmulationNetworkConditionsOffline {
+  type: "offline";
+}
+
+export interface EmulationSetScreenSettingsOverride {
+  method: "emulation.setScreenSettingsOverride";
+  params: EmulationSetScreenSettingsOverrideParameters;
+}
+
+export interface EmulationScreenArea {
+  width: JsUint;
+  height: JsUint;
+}
+
+export interface EmulationSetScreenSettingsOverrideParameters {
+  screenArea: EmulationScreenArea | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetScreenOrientationOverride {
+  method: "emulation.setScreenOrientationOverride";
+  params: EmulationSetScreenOrientationOverrideParameters;
+}
+
+export type EmulationScreenOrientationNatural = "portrait" | "landscape";
+export type EmulationScreenOrientationType = "portrait-primary" | "portrait-secondary" | "landscape-primary" | "landscape-secondary";
+
+export interface EmulationScreenOrientation {
+  natural: EmulationScreenOrientationNatural;
+  type: EmulationScreenOrientationType;
+}
+
+export interface EmulationSetScreenOrientationOverrideParameters {
+  screenOrientation: EmulationScreenOrientation | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetUserAgentOverride {
+  method: "emulation.setUserAgentOverride";
+  params: EmulationSetUserAgentOverrideParameters;
+}
+
+export interface EmulationSetUserAgentOverrideParameters {
+  userAgent: string | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetScriptingEnabled {
+  method: "emulation.setScriptingEnabled";
+  params: EmulationSetScriptingEnabledParameters;
+}
+
+export interface EmulationSetScriptingEnabledParameters {
+  enabled: false | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetScrollbarTypeOverride {
+  method: "emulation.setScrollbarTypeOverride";
+  params: EmulationSetScrollbarTypeOverrideParameters;
+}
+
+export interface EmulationSetScrollbarTypeOverrideParameters {
+  scrollbarType: "classic" | "overlay" | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetTimezoneOverride {
+  method: "emulation.setTimezoneOverride";
+  params: EmulationSetTimezoneOverrideParameters;
+}
+
+export interface EmulationSetTimezoneOverrideParameters {
+  timezone: string | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface EmulationSetTouchOverride {
+  method: "emulation.setTouchOverride";
+  params: EmulationSetTouchOverrideParameters;
+}
+
+export interface EmulationSetTouchOverrideParameters {
+  maxTouchPoints: JsUint | null;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export type NetworkCommand = NetworkAddDataCollector | NetworkAddIntercept | NetworkContinueRequest | NetworkContinueResponse | NetworkContinueWithAuth | NetworkDisownData | NetworkFailRequest | NetworkGetData | NetworkProvideResponse | NetworkRemoveDataCollector | NetworkRemoveIntercept | NetworkSetCacheBehavior | NetworkSetExtraHeaders;
+
+export interface NetworkAuthCredentials {
+  type: "password";
+  username: string;
+  password: string;
+}
+
+export type NetworkBytesValue = NetworkStringValue | NetworkBase64Value;
+
+export interface NetworkStringValue {
+  type: "string";
+  value: string;
+}
+
+export interface NetworkBase64Value {
+  type: "base64";
+  value: string;
+}
+
+export type NetworkCollector = string;
+export type NetworkCollectorType = "blob";
+export type NetworkSameSite = "strict" | "lax" | "none" | "default";
+
+export type NetworkCookie = Extensible & {
+  name: string;
+  value: NetworkBytesValue;
+  domain: string;
+  path: string;
+  size: JsUint;
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: NetworkSameSite;
+  expiry?: JsUint;
+};
+
+export interface NetworkCookieHeader {
+  name: string;
+  value: NetworkBytesValue;
+}
+
+export type NetworkDataType = "request" | "response";
+
+export interface NetworkHeader {
+  name: string;
+  value: NetworkBytesValue;
+}
+
+export type NetworkIntercept = string;
+export type NetworkRequest = string;
+
+export interface NetworkSetCookieHeader {
+  name: string;
+  value: NetworkBytesValue;
+  domain?: string;
+  httpOnly?: boolean;
+  expiry?: string;
+  maxAge?: JsInt;
+  path?: string;
+  sameSite?: NetworkSameSite;
+  secure?: boolean;
+}
+
+export type NetworkUrlPattern = NetworkUrlPatternPattern | NetworkUrlPatternString;
+
+export interface NetworkUrlPatternPattern {
+  type: "pattern";
+  protocol?: string;
+  hostname?: string;
+  port?: string;
+  pathname?: string;
+  search?: string;
+}
+
+export interface NetworkUrlPatternString {
+  type: "string";
+  pattern: string;
+}
+
+export interface NetworkAddDataCollector {
+  method: "network.addDataCollector";
+  params: NetworkAddDataCollectorParameters;
+}
+
+export interface NetworkAddDataCollectorParameters {
+  dataTypes: NetworkDataType[];
+  maxEncodedDataSize: JsUint;
+  /**
+   * @default 'blob'
+   */
+  collectorType?: NetworkCollectorType;
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export interface NetworkAddIntercept {
+  method: "network.addIntercept";
+  params: NetworkAddInterceptParameters;
+}
+
+export interface NetworkAddInterceptParameters {
+  phases: NetworkInterceptPhase[];
+  contexts?: BrowsingContextBrowsingContext[];
+  urlPatterns?: NetworkUrlPattern[];
+}
+
+export type NetworkInterceptPhase = "beforeRequestSent" | "responseStarted" | "authRequired";
+
+export interface NetworkContinueRequest {
+  method: "network.continueRequest";
+  params: NetworkContinueRequestParameters;
+}
+
+export interface NetworkContinueRequestParameters {
+  request: NetworkRequest;
+  body?: NetworkBytesValue;
+  cookies?: NetworkCookieHeader[];
+  headers?: NetworkHeader[];
+  method?: string;
+  url?: string;
+}
+
+export interface NetworkContinueResponse {
+  method: "network.continueResponse";
+  params: NetworkContinueResponseParameters;
+}
+
+export interface NetworkContinueResponseParameters {
+  request: NetworkRequest;
+  cookies?: NetworkSetCookieHeader[];
+  credentials?: NetworkAuthCredentials;
+  headers?: NetworkHeader[];
+  reasonPhrase?: string;
+  statusCode?: JsUint;
+}
+
+export interface NetworkContinueWithAuth {
+  method: "network.continueWithAuth";
+  params: NetworkContinueWithAuthParameters;
+}
+
+export type NetworkContinueWithAuthParameters = (NetworkContinueWithAuthCredentials | NetworkContinueWithAuthNoCredentials) & {
+  request: NetworkRequest;
+};
+
+export interface NetworkContinueWithAuthCredentials {
+  action: "provideCredentials";
+  credentials: NetworkAuthCredentials;
+}
+
+export interface NetworkContinueWithAuthNoCredentials {
+  action: "default" | "cancel";
+}
+
+export interface NetworkDisownData {
+  method: "network.disownData";
+  params: NetworkDisownDataParameters;
+}
+
+export interface NetworkDisownDataParameters {
+  dataType: NetworkDataType;
+  collector: NetworkCollector;
+  request: NetworkRequest;
+}
+
+export interface NetworkFailRequest {
+  method: "network.failRequest";
+  params: NetworkFailRequestParameters;
+}
+
+export interface NetworkFailRequestParameters {
+  request: NetworkRequest;
+}
+
+export interface NetworkGetData {
+  method: "network.getData";
+  params: NetworkGetDataParameters;
+}
+
+export interface NetworkGetDataParameters {
+  dataType: NetworkDataType;
+  collector?: NetworkCollector;
+  disown?: boolean;
+  request: NetworkRequest;
+}
+
+export interface NetworkProvideResponse {
+  method: "network.provideResponse";
+  params: NetworkProvideResponseParameters;
+}
+
+export interface NetworkProvideResponseParameters {
+  request: NetworkRequest;
+  body?: NetworkBytesValue;
+  cookies?: NetworkSetCookieHeader[];
+  headers?: NetworkHeader[];
+  reasonPhrase?: string;
+  statusCode?: JsUint;
+}
+
+export interface NetworkRemoveDataCollector {
+  method: "network.removeDataCollector";
+  params: NetworkRemoveDataCollectorParameters;
+}
+
+export interface NetworkRemoveDataCollectorParameters {
+  collector: NetworkCollector;
+}
+
+export interface NetworkRemoveIntercept {
+  method: "network.removeIntercept";
+  params: NetworkRemoveInterceptParameters;
+}
+
+export interface NetworkRemoveInterceptParameters {
+  intercept: NetworkIntercept;
+}
+
+export interface NetworkSetCacheBehavior {
+  method: "network.setCacheBehavior";
+  params: NetworkSetCacheBehaviorParameters;
+}
+
+export interface NetworkSetCacheBehaviorParameters {
+  cacheBehavior: "default" | "bypass";
+  contexts?: BrowsingContextBrowsingContext[];
+}
+
+export interface NetworkSetExtraHeaders {
+  method: "network.setExtraHeaders";
+  params: NetworkSetExtraHeadersParameters;
+}
+
+export interface NetworkSetExtraHeadersParameters {
+  headers: NetworkHeader[];
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+}
+
+export type ScriptCommand = ScriptAddPreloadScript | ScriptCallFunction | ScriptDisown | ScriptEvaluate | ScriptGetRealms | ScriptRemovePreloadScript;
+export type ScriptChannel = string;
+
+export interface ScriptChannelValue {
+  type: "channel";
+  value: ScriptChannelProperties;
+}
+
+export interface ScriptChannelProperties {
+  channel: ScriptChannel;
+  serializationOptions?: ScriptSerializationOptions;
+  ownership?: ScriptResultOwnership;
+}
+
+export type ScriptEvaluateResult = ScriptEvaluateResultSuccess | ScriptEvaluateResultException;
+
+export interface ScriptEvaluateResultSuccess {
+  type: "success";
+  result: ScriptRemoteValue;
+  realm: ScriptRealm;
+}
+
+export interface ScriptEvaluateResultException {
+  type: "exception";
+  exceptionDetails: ScriptExceptionDetails;
+  realm: ScriptRealm;
+}
+
+export interface ScriptExceptionDetails {
+  columnNumber: JsUint;
+  exception: ScriptRemoteValue;
+  lineNumber: JsUint;
+  stackTrace: ScriptStackTrace;
+  text: string;
+}
+
+export type ScriptHandle = string;
+export type ScriptInternalId = string;
+export type ScriptLocalValue = ScriptRemoteReference | ScriptPrimitiveProtocolValue | ScriptChannelValue | ScriptArrayLocalValue | ScriptDateLocalValue | ScriptObjectLocalValue | ScriptRegExpLocalValue;
+export type ScriptListLocalValue = ScriptLocalValue[];
+
+export interface ScriptArrayLocalValue {
+  type: "array";
+  value: ScriptListLocalValue;
+}
+
+export interface ScriptDateLocalValue {
+  type: "date";
+  value: string;
+}
+
+export type ScriptMappingLocalValue = (ScriptLocalValue | ScriptLocalValue)[];
+
+export interface ScriptMapLocalValue {
+  type: "map";
+  value: ScriptMappingLocalValue;
+}
+
+export interface ScriptObjectLocalValue {
+  type: "object";
+  value: ScriptMappingLocalValue;
+}
+
+export interface ScriptRegExpValue {
+  pattern: string;
+  flags?: string;
+}
+
+export interface ScriptRegExpLocalValue {
+  type: "regexp";
+  value: ScriptRegExpValue;
+}
+
+export interface ScriptSetLocalValue {
+  type: "set";
+  value: ScriptListLocalValue;
+}
+
+export type ScriptPreloadScript = string;
+export type ScriptRealm = string;
+export type ScriptPrimitiveProtocolValue = ScriptUndefinedValue | ScriptNullValue | ScriptStringValue | ScriptNumberValue | ScriptBooleanValue | ScriptBigIntValue;
+
+export interface ScriptUndefinedValue {
+  type: "undefined";
+}
+
+export interface ScriptNullValue {
+  type: null;
+}
+
+export interface ScriptStringValue {
+  type: "string";
+  value: string;
+}
+
+export type ScriptSpecialNumber = "NaN" | "-0" | "Infinity" | "-Infinity";
+
+export interface ScriptNumberValue {
+  type: "number";
+  value: Number | ScriptSpecialNumber;
+}
+
+export interface ScriptBooleanValue {
+  type: "boolean";
+  value: boolean;
+}
+
+export interface ScriptBigIntValue {
+  type: "bigint";
+  value: string;
+}
+
+export type ScriptRealmType = "window" | "dedicated-worker" | "shared-worker" | "service-worker" | "worker" | "paint-worklet" | "audio-worklet" | "worklet";
+export type ScriptRemoteReference = ScriptSharedReference | ScriptRemoteObjectReference;
+
+export type ScriptSharedReference = Extensible & {
+  sharedId: ScriptSharedId;
+  handle?: ScriptHandle;
+};
+
+export type ScriptRemoteObjectReference = Extensible & {
+  handle: ScriptHandle;
+  sharedId?: ScriptSharedId;
+};
+
+export type ScriptRemoteValue = ScriptPrimitiveProtocolValue | ScriptSymbolRemoteValue | ScriptArrayRemoteValue | ScriptObjectRemoteValue | ScriptFunctionRemoteValue | ScriptRegExpRemoteValue | ScriptDateRemoteValue | ScriptMapRemoteValue | ScriptSetRemoteValue | ScriptWeakMapRemoteValue | ScriptWeakSetRemoteValue | ScriptGeneratorRemoteValue | ScriptErrorRemoteValue | ScriptProxyRemoteValue | ScriptPromiseRemoteValue | ScriptTypedArrayRemoteValue | ScriptArrayBufferRemoteValue | ScriptNodeListRemoteValue | ScriptHtmlCollectionRemoteValue | ScriptNodeRemoteValue | ScriptWindowProxyRemoteValue;
+export type ScriptListRemoteValue = ScriptRemoteValue[];
+export type ScriptMappingRemoteValue = (ScriptRemoteValue | ScriptRemoteValue)[];
+
+export interface ScriptSymbolRemoteValue {
+  type: "symbol";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptArrayRemoteValue {
+  type: "array";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptListRemoteValue;
+}
+
+export interface ScriptObjectRemoteValue {
+  type: "object";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptMappingRemoteValue;
+}
+
+export interface ScriptFunctionRemoteValue {
+  type: "function";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export type ScriptRegExpRemoteValue = ScriptRegExpLocalValue & {
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+};
+
+export type ScriptDateRemoteValue = ScriptDateLocalValue & {
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+};
+
+export interface ScriptMapRemoteValue {
+  type: "map";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptMappingRemoteValue;
+}
+
+export interface ScriptSetRemoteValue {
+  type: "set";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptListRemoteValue;
+}
+
+export interface ScriptWeakMapRemoteValue {
+  type: "weakmap";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptWeakSetRemoteValue {
+  type: "weakset";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptGeneratorRemoteValue {
+  type: "generator";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptErrorRemoteValue {
+  type: "error";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptProxyRemoteValue {
+  type: "proxy";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptPromiseRemoteValue {
+  type: "promise";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptTypedArrayRemoteValue {
+  type: "typedarray";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptArrayBufferRemoteValue {
+  type: "arraybuffer";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptNodeListRemoteValue {
+  type: "nodelist";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptListRemoteValue;
+}
+
+export interface ScriptHtmlCollectionRemoteValue {
+  type: "htmlcollection";
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptListRemoteValue;
+}
+
+export interface ScriptNodeRemoteValue {
+  type: "node";
+  sharedId?: ScriptSharedId;
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+  value?: ScriptNodeProperties;
+}
+
+export interface ScriptNodeProperties {
+  nodeType: JsUint;
+  childNodeCount: JsUint;
+  attributes?: Record<string, string>;
+  children?: ScriptNodeRemoteValue[];
+  localName?: string;
+  mode?: "open" | "closed";
+  namespaceUri?: string;
+  nodeValue?: string;
+  shadowRoot?: ScriptNodeRemoteValue | null;
+}
+
+export interface ScriptWindowProxyRemoteValue {
+  type: "window";
+  value: ScriptWindowProxyProperties;
+  handle?: ScriptHandle;
+  internalId?: ScriptInternalId;
+}
+
+export interface ScriptWindowProxyProperties {
+  context: BrowsingContextBrowsingContext;
+}
+
+export type ScriptResultOwnership = "root" | "none";
+
+export interface ScriptSerializationOptions {
+  maxDomDepth?: JsUint | null;
+  /**
+   * @default null
+   */
+  maxObjectDepth?: JsUint | null;
+  /**
+   * @default 'none'
+   */
+  includeShadowTree?: "none" | "open" | "all";
+}
+
+export type ScriptSharedId = string;
+
+export interface ScriptStackFrame {
+  columnNumber: JsUint;
+  functionName: string;
+  lineNumber: JsUint;
+  url: string;
+}
+
+export interface ScriptStackTrace {
+  callFrames: ScriptStackFrame[];
+}
+
+export interface ScriptRealmTarget {
+  realm: ScriptRealm;
+}
+
+export interface ScriptContextTarget {
+  context: BrowsingContextBrowsingContext;
+  sandbox?: string;
+}
+
+export type ScriptTarget = ScriptContextTarget | ScriptRealmTarget;
+
+export interface ScriptAddPreloadScript {
+  method: "script.addPreloadScript";
+  params: ScriptAddPreloadScriptParameters;
+}
+
+export interface ScriptAddPreloadScriptParameters {
+  functionDeclaration: string;
+  arguments?: ScriptChannelValue[];
+  contexts?: BrowsingContextBrowsingContext[];
+  userContexts?: BrowserUserContext[];
+  sandbox?: string;
+}
+
+export interface ScriptDisown {
+  method: "script.disown";
+  params: ScriptDisownParameters;
+}
+
+export interface ScriptDisownParameters {
+  handles: ScriptHandle[];
+  target: ScriptTarget;
+}
+
+export interface ScriptCallFunction {
+  method: "script.callFunction";
+  params: ScriptCallFunctionParameters;
+}
+
+export interface ScriptCallFunctionParameters {
+  functionDeclaration: string;
+  awaitPromise: boolean;
+  target: ScriptTarget;
+  arguments?: ScriptLocalValue[];
+  resultOwnership?: ScriptResultOwnership;
+  serializationOptions?: ScriptSerializationOptions;
+  this?: ScriptLocalValue;
+  userActivation?: boolean;
+}
+
+export interface ScriptEvaluate {
+  method: "script.evaluate";
+  params: ScriptEvaluateParameters;
+}
+
+export interface ScriptEvaluateParameters {
+  expression: string;
+  target: ScriptTarget;
+  awaitPromise: boolean;
+  resultOwnership?: ScriptResultOwnership;
+  serializationOptions?: ScriptSerializationOptions;
+  userActivation?: boolean;
+}
+
+export interface ScriptGetRealms {
+  method: "script.getRealms";
+  params: ScriptGetRealmsParameters;
+}
+
+export interface ScriptGetRealmsParameters {
+  context?: BrowsingContextBrowsingContext;
+  type?: ScriptRealmType;
+}
+
+export interface ScriptRemovePreloadScript {
+  method: "script.removePreloadScript";
+  params: ScriptRemovePreloadScriptParameters;
+}
+
+export interface ScriptRemovePreloadScriptParameters {
+  script: ScriptPreloadScript;
+}
+
+export type StorageCommand = StorageDeleteCookies | StorageGetCookies | StorageSetCookie;
+
+export type StoragePartitionKey = Extensible & {
+  userContext?: string;
+  sourceOrigin?: string;
+};
+
+export interface StorageGetCookies {
+  method: "storage.getCookies";
+  params: StorageGetCookiesParameters;
+}
+
+export type StorageCookieFilter = Extensible & {
+  name?: string;
+  value?: NetworkBytesValue;
+  domain?: string;
+  path?: string;
+  size?: JsUint;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: NetworkSameSite;
+  expiry?: JsUint;
+};
+
+export interface StorageBrowsingContextPartitionDescriptor {
+  type: "context";
+  context: BrowsingContextBrowsingContext;
+}
+
+export type StorageStorageKeyPartitionDescriptor = Extensible & {
+  type: "storageKey";
+  userContext?: string;
+  sourceOrigin?: string;
+};
+
+export type StoragePartitionDescriptor = StorageBrowsingContextPartitionDescriptor | StorageStorageKeyPartitionDescriptor;
+
+export interface StorageGetCookiesParameters {
+  filter?: StorageCookieFilter;
+  partition?: StoragePartitionDescriptor;
+}
+
+export interface StorageSetCookie {
+  method: "storage.setCookie";
+  params: StorageSetCookieParameters;
+}
+
+export type StoragePartialCookie = Extensible & {
+  name: string;
+  value: NetworkBytesValue;
+  domain: string;
+  path?: string;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: NetworkSameSite;
+  expiry?: JsUint;
+};
+
+export interface StorageSetCookieParameters {
+  cookie: StoragePartialCookie;
+  partition?: StoragePartitionDescriptor;
+}
+
+export interface StorageDeleteCookies {
+  method: "storage.deleteCookies";
+  params: StorageDeleteCookiesParameters;
+}
+
+export interface StorageDeleteCookiesParameters {
+  filter?: StorageCookieFilter;
+  partition?: StoragePartitionDescriptor;
+}
+
+export type InputCommand = InputPerformActions | InputReleaseActions | InputSetFiles;
+
+export interface InputElementOrigin {
+  type: "element";
+  element: ScriptSharedReference;
+}
+
+export interface InputPerformActions {
+  method: "input.performActions";
+  params: InputPerformActionsParameters;
+}
+
+export interface InputPerformActionsParameters {
+  context: BrowsingContextBrowsingContext;
+  actions: InputSourceActions[];
+}
+
+export type InputSourceActions = InputNoneSourceActions | InputKeySourceActions | InputPointerSourceActions | InputWheelSourceActions;
+
+export interface InputNoneSourceActions {
+  type: "none";
+  id: string;
+  actions: InputNoneSourceAction[];
+}
+
+export type InputNoneSourceAction = InputPauseAction;
+
+export interface InputKeySourceActions {
+  type: "key";
+  id: string;
+  actions: InputKeySourceAction[];
+}
+
+export type InputKeySourceAction = InputPauseAction | InputKeyDownAction | InputKeyUpAction;
+
+export interface InputPointerSourceActions {
+  type: "pointer";
+  id: string;
+  parameters?: InputPointerParameters;
+  actions: InputPointerSourceAction[];
+}
+
+export type InputPointerType = "mouse" | "pen" | "touch";
+
+export interface InputPointerParameters {
+  /**
+   * @default 'mouse'
+   */
+  pointerType?: InputPointerType;
+}
+
+export type InputPointerSourceAction = InputPauseAction | InputPointerDownAction | InputPointerUpAction | InputPointerMoveAction;
+
+export interface InputWheelSourceActions {
+  type: "wheel";
+  id: string;
+  actions: InputWheelSourceAction[];
+}
+
+export type InputWheelSourceAction = InputPauseAction | InputWheelScrollAction;
+
+export interface InputPauseAction {
+  type: "pause";
+  duration?: JsUint;
+}
+
+export interface InputKeyDownAction {
+  type: "keyDown";
+  value: string;
+}
+
+export interface InputKeyUpAction {
+  type: "keyUp";
+  value: string;
+}
+
+export interface InputPointerUpAction {
+  type: "pointerUp";
+  button: JsUint;
+}
+
+export type InputPointerDownAction = InputPointerCommonProperties & {
+  type: "pointerDown";
+  button: JsUint;
+};
+
+export type InputPointerMoveAction = InputPointerCommonProperties & {
+  type: "pointerMove";
+  x: number;
+  y: number;
+  duration?: JsUint;
+  origin?: InputOrigin;
+};
+
+export interface InputWheelScrollAction {
+  type: "scroll";
+  x: JsInt;
+  y: JsInt;
+  deltaX: JsInt;
+  deltaY: JsInt;
+  duration?: JsUint;
+  /**
+   * @default 'viewport'
+   */
+  origin?: InputOrigin;
+}
+
+export interface InputPointerCommonProperties {
+  /**
+   * @default 1
+   */
+  width?: JsUint;
+  /**
+   * @default 1
+   */
+  height?: JsUint;
+  pressure?: number;
+  tangentialPressure?: number;
+  /**
+   * 0 .. Math.PI / 2
+   */
+  twist?: number;
+  /**
+   * 0 .. 2 * Math.PI
+   */
+  altitudeAngle?: number;
+  azimuthAngle?: number;
+}
+
+export type InputOrigin = "viewport" | "pointer" | InputElementOrigin;
+
+export interface InputReleaseActions {
+  method: "input.releaseActions";
+  params: InputReleaseActionsParameters;
+}
+
+export interface InputReleaseActionsParameters {
+  context: BrowsingContextBrowsingContext;
+}
+
+export interface InputSetFiles {
+  method: "input.setFiles";
+  params: InputSetFilesParameters;
+}
+
+export interface InputSetFilesParameters {
+  context: BrowsingContextBrowsingContext;
+  element: ScriptSharedReference;
+  files: string[];
+}
+
+export type WebExtensionCommand = WebExtensionInstall | WebExtensionUninstall;
+export type WebExtensionExtension = string;
+
+export interface WebExtensionInstall {
+  method: "webExtension.install";
+  params: WebExtensionInstallParameters;
+}
+
+export interface WebExtensionInstallParameters {
+  extensionData: WebExtensionExtensionData;
+}
+
+export type WebExtensionExtensionData = WebExtensionExtensionArchivePath | WebExtensionExtensionBase64Encoded | WebExtensionExtensionPath;
+
+export interface WebExtensionExtensionPath {
+  type: "path";
+  path: string;
+}
+
+export interface WebExtensionExtensionArchivePath {
+  type: "archivePath";
+  path: string;
+}
+
+export interface WebExtensionExtensionBase64Encoded {
+  type: "base64";
+  value: string;
+}
+
+export interface WebExtensionUninstall {
+  method: "webExtension.uninstall";
+  params: WebExtensionUninstallParameters;
+}
+
+export interface WebExtensionUninstallParameters {
+  extension: WebExtensionExtension;
+}"
+`;
