@@ -2,7 +2,7 @@ import camelcase from 'camelcase'
 import { parse, print, types } from 'recast'
 import typescriptParser from 'recast/parsers/typescript.js'
 
-import type { Assignment, PropertyType, PropertyReference, Property, Array, NativeTypeWithOperator, Type, Group, Operator } from 'cddl'
+import type { Assignment, PropertyType, PropertyReference, Property, Array, Operator } from 'cddl'
 
 import {
     isCDDLArray,
@@ -59,7 +59,7 @@ export function transform (assignments: Assignment[], options?: TransformOptions
     ) satisfies types.namedTypes.File
 
     for (const assignment of assignments) {
-        const statement = parseAssignment(ast, assignment)
+        const statement = parseAssignment(assignment)
         if (!statement) {
             continue
         }
@@ -68,7 +68,7 @@ export function transform (assignments: Assignment[], options?: TransformOptions
     return print(ast).code
 }
 
-function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
+function parseAssignment (assignment: Assignment) {
     if (isVariable(assignment)) {
         const propType = Array.isArray(assignment.PropertyType)
             ? assignment.PropertyType

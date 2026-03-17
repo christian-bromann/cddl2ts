@@ -17,17 +17,16 @@ on:
         required: true
         default: 'latest'
 
-env:
-  NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 20.x
+          node-version: 22.x
       - name: Install Dependencies
         run: npm ci
       - name: Unit Tests
@@ -35,13 +34,17 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Node version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 20.x
+          node-version: 24.x
           registry-url: https://registry.npmjs.org/
       - name: Setup Git
         run: |
@@ -56,5 +59,5 @@ jobs:
       - name: Release
         run: npm run release:ci -- ${{github.event.inputs.releaseType}}
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NPM_CONFIG_PROVENANCE: true

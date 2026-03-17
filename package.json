@@ -12,6 +12,10 @@
   "keywords": [
     "cddl"
   ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "bugs": {
     "url": "https://github.com/christian-bromann/cddl2ts/issues"
   },
@@ -35,8 +39,7 @@
     "generate:examples": "npm run generate:local && npm run generate:remote",
     "test": "vitest run",
     "watch": "tsc --watch",
-    "checks:all": "npm run compile && npm run test && npm run generate:examples",
-    "postinstall": "patch-package"
+    "checks:all": "npm run compile && npm run test && npm run generate:examples"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.35",
@@ -51,7 +54,6 @@
     "@babel/parser": "^7.29.0",
     "camelcase": "^9.0.0",
     "cddl": "^0.13.0",
-    "patch-package": "^8.0.1",
     "recast": "^0.23.11",
     "yargs": "^18.0.0"
   }

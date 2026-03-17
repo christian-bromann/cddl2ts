@@ -1,12 +1,10 @@
 import {
     Assignment,
-    PropertyType,
     PropertyReference,
     Property,
     Array,
     NativeTypeWithOperator,
     Group,
-    Operator,
     Variable
 } from 'cddl'
 import camelcase from 'camelcase'
