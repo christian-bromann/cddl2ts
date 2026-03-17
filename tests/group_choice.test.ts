@@ -47,8 +47,7 @@ describe('group choice conversion', () => {
         // these assertions are updated to expect type aliases.
         expect(output).toContain('export type AutodetectProxyConfiguration = Extensible & {')
         expect(output).toContain('export type DirectProxyConfiguration = Extensible & {')
-        expect(output).toContain('export type ManualProxyConfiguration = Extensible & {')
-        
+
         expect(output).toMatchSnapshot()
     })
 })

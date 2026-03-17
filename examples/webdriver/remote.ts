@@ -169,7 +169,7 @@ export interface BrowserSetClientWindowState {
   params: BrowserSetClientWindowStateParameters;
 }
 
-export type BrowserSetClientWindowStateParameters = BrowserClientWindowNamedState & {
+export type BrowserSetClientWindowStateParameters = (BrowserClientWindowNamedState | BrowserClientWindowRectState) & {
   clientWindow: BrowserClientWindow;
 };
 
@@ -195,7 +195,7 @@ export interface BrowserSetDownloadBehaviorParameters {
   userContexts?: BrowserUserContext[];
 }
 
-export type BrowserDownloadBehavior = BrowserDownloadBehaviorAllowed;
+export type BrowserDownloadBehavior = (BrowserDownloadBehaviorAllowed | BrowserDownloadBehaviorDenied);
 
 export interface BrowserDownloadBehaviorAllowed {
   type: "allowed";
@@ -486,7 +486,11 @@ export interface EmulationSetGeolocationOverride {
   params: EmulationSetGeolocationOverrideParameters;
 }
 
-export type EmulationSetGeolocationOverrideParameters = {
+export type EmulationSetGeolocationOverrideParameters = ({
+  coordinates: EmulationGeolocationCoordinates | null;
+} | {
+  error: EmulationGeolocationPositionError;
+}) & {
   contexts?: BrowsingContextBrowsingContext[];
   userContexts?: BrowserUserContext[];
 };
@@ -779,7 +783,7 @@ export interface NetworkContinueWithAuth {
   params: NetworkContinueWithAuthParameters;
 }
 
-export type NetworkContinueWithAuthParameters = NetworkContinueWithAuthCredentials & {
+export type NetworkContinueWithAuthParameters = (NetworkContinueWithAuthCredentials | NetworkContinueWithAuthNoCredentials) & {
   request: NetworkRequest;
 };
 
@@ -915,7 +919,7 @@ export interface ScriptExceptionDetails {
 
 export type ScriptHandle = string;
 export type ScriptInternalId = string;
-export type ScriptLocalValue = ScriptRemoteReference | ScriptPrimitiveProtocolValue | ScriptChannelValue | ScriptArrayLocalValue | {} | ScriptObjectLocalValue | {};
+export type ScriptLocalValue = ScriptRemoteReference | ScriptPrimitiveProtocolValue | ScriptChannelValue | ScriptArrayLocalValue | ScriptDateLocalValue | ScriptObjectLocalValue | ScriptRegExpLocalValue;
 export type ScriptListLocalValue = ScriptLocalValue[];
 
 export interface ScriptArrayLocalValue {
@@ -1481,18 +1485,6 @@ export interface InputSetFilesParameters {
   context: BrowsingContextBrowsingContext;
   element: ScriptSharedReference;
   files: string[];
-}
-
-export interface InputFileDialogOpened {
-  method: "input.fileDialogOpened";
-  params: InputFileDialogInfo;
-}
-
-export interface InputFileDialogInfo {
-  context: BrowsingContextBrowsingContext;
-  userContext?: BrowserUserContext;
-  element?: ScriptSharedReference;
-  multiple: boolean;
 }
 
 export type WebExtensionCommand = WebExtensionInstall | WebExtensionUninstall;

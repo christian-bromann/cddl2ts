@@ -4,12 +4,26 @@ import typescriptParser from 'recast/parsers/typescript.js'
 
 import type { Assignment, PropertyType, PropertyReference, Property, Array, NativeTypeWithOperator, Type, Group, Operator } from 'cddl'
 
+import {
+    isCDDLArray,
+    isGroup,
+    isNamedGroupReference,
+    isLiteralWithValue,
+    isNativeTypeWithOperator,
+    isUnNamedProperty,
+    isPropertyReference,
+    isRange,
+    isVariable,
+    pascalCase
+} from './utils.js'
+
 import { pkg } from './constants.js'
 
 const b = types.builders
 const NATIVE_TYPES: Record<string, any> = {
     any: b.tsAnyKeyword(),
     number: b.tsNumberKeyword(),
+    int: b.tsNumberKeyword(),
     float: b.tsNumberKeyword(),
     uint: b.tsNumberKeyword(),
     bool: b.tsBooleanKeyword(),
@@ -42,7 +56,7 @@ export function transform (assignments: Assignment[], options?: TransformOptions
             sourceFileName: 'cddl2Ts.ts',
             sourceRoot: process.cwd()
         }
-    ) as types.namedTypes.File
+    ) satisfies types.namedTypes.File
 
     for (const assignment of assignments) {
         const statement = parseAssignment(ast, assignment)
@@ -55,12 +69,12 @@ export function transform (assignments: Assignment[], options?: TransformOptions
 }
 
 function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
-    if (assignment.Type === 'variable') {
+    if (isVariable(assignment)) {
         const propType = Array.isArray(assignment.PropertyType)
             ? assignment.PropertyType
             : [assignment.PropertyType]
 
-        const id = b.identifier(camelcase(assignment.Name, { pascalCase: true }))
+        const id = b.identifier(pascalCase(assignment.Name))
 
         let typeParameters: any
         // @ts-expect-error e.g. "js-int = -9007199254740991..9007199254740991"
@@ -75,13 +89,13 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         return b.exportDeclaration(false, expr)
     }
 
-    if (assignment.Type === 'group') {
-        const id = b.identifier(camelcase(assignment.Name, { pascalCase: true }))
+    if (isGroup(assignment)) {
+        const id = b.identifier(pascalCase(assignment.Name))
 
         /**
          * Check if we have choices in the group (arrays of Properties)
          */
-        const properties = assignment.Properties as (Property | Property[])[]
+        const properties = assignment.Properties
         const hasChoices = properties.some(p => Array.isArray(p))
 
         if (hasChoices) {
@@ -97,8 +111,10 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
                     // CDDL parser appends the last choice element as a subsequent property
                     // so we need to grab it and merge it into the union
                     const choiceOptions = [...prop]
-                    if (properties[i + 1] && !Array.isArray(properties[i + 1])) {
-                        choiceOptions.push(properties[i + 1] as Property)
+                    const nextProp = properties[i + 1]
+
+                    if (nextProp && !Array.isArray(nextProp)) {
+                        choiceOptions.push(nextProp)
                         i++ // Skip next property
                     }
 
@@ -108,24 +124,29 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
                         // The parser sometimes wraps it in an array, sometimes not (if inside a choice)
                         const typeVal = Array.isArray(p.Type) ? p.Type[0] : p.Type
 
-                        if (p.Name === '' && (typeVal as any).Type === 'group') {
-                             return b.tsTypeReference(
-                                b.identifier(camelcase((typeVal as any).Value as string, { pascalCase: true }))
-                            )
-                        }
+                        if (isUnNamedProperty(p)) {
+                            // Handle un-named properties (bare types) in choices.
+                            // Native types / literals
+                            if (isNamedGroupReference(typeVal)) {
+                                return b.tsTypeReference(
+                                   b.identifier(pascalCase(typeVal.Value || typeVal.Type))
+                               )
+                            }
+                            return parseUnionType(typeVal);
+                       }
                         // Otherwise it is an object literal with this property
                         return b.tsTypeLiteral(parseObjectType([p]))
                     })
                     intersections.push(b.tsUnionType(options))
                 } else {
-                    staticProps.push(prop as Property)
+                    staticProps.push(prop)
                 }
             }
 
             if (staticProps.length > 0) {
                 // Check if we have mixins in static props
-                const mixins = staticProps.filter(p => p.Name === '')
-                const ownProps = staticProps.filter(p => p.Name !== '')
+                const mixins = staticProps.filter(isUnNamedProperty)
+                const ownProps = staticProps.filter(p => !isUnNamedProperty(p))
 
                 if (ownProps.length > 0) {
                     intersections.unshift(b.tsTypeLiteral(parseObjectType(ownProps)))
@@ -133,20 +154,13 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
 
                 for (const mixin of mixins) {
                     if (Array.isArray(mixin.Type) && mixin.Type.length > 1) {
-                         const options = mixin.Type.map(t => {
-                             if ((t as any).Type === 'group') {
-                                 return b.tsTypeReference(
-                                     b.identifier(camelcase((t as any).Value as string, { pascalCase: true }))
-                                 )
-                             }
-                             throw new Error(`Unexpected type in mixin union: ${JSON.stringify(t)}`)
-                         })
+                         const options = mixin.Type.map(parseUnionType)
                          intersections.push(b.tsUnionType(options))
                     } else {
                         const typeVal = Array.isArray(mixin.Type) ? mixin.Type[0] : mixin.Type
-                        if ((typeVal as any).Type === 'group') {
+                        if (isNamedGroupReference(typeVal)) {
                             intersections.push(b.tsTypeReference(
-                                b.identifier(camelcase((typeVal as any).Value as string, { pascalCase: true }))
+                                b.identifier(pascalCase(typeVal.Value))
                             ))
                         }
                     }
@@ -169,14 +183,20 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
             return b.exportDeclaration(false, expr)
         }
 
+        const props = properties as Property[]
+
         /**
          * transform CDDL groups like `Extensible = (*text => any)`
          */
-        if (assignment.Properties.length === 1 && ((assignment.Properties as Property[])[0].Type as PropertyType[]).length === 1 && Object.keys(NATIVE_TYPES).includes(((assignment.Properties as Property[])[0].Name))) {
-            const value = parseUnionType(assignment)
-            const expr = b.tsTypeAliasDeclaration(id, value)
-            expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
-            return b.exportDeclaration(false, expr)
+        if (props.length === 1) {
+            const prop = props[0]
+            const propType = Array.isArray(prop.Type) ? prop.Type : [prop.Type]
+            if (propType.length === 1 && Object.keys(NATIVE_TYPES).includes(prop.Name)) {
+                const value = parseUnionType(assignment)
+                const expr = b.tsTypeAliasDeclaration(id, value)
+                expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
+                return b.exportDeclaration(false, expr)
+            }
         }
 
         // Check if extended interfaces are likely unions or conflicting types
@@ -186,48 +206,214 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         // However, if we simply use type intersection for ALL group inclusions, it is always safe.
         // (Interface extending Interface is same as Type = Interface & Interface)
         // Let's refactor to use Type Alias with Intersection if there are any mixins.
-        
-        const mixins = (assignment.Properties as Property[])
-            .filter((prop: Property) => prop.Name === '')
-        
+
+        const mixins = props.filter(isUnNamedProperty)
+
         if (mixins.length > 0) {
             // It has mixins (extensions). Use type alias with intersection to be safe against unions.
             // Type = (Mixin1 & Mixin2 & { OwnProps })
-            
+
             const intersections: any[] = []
-            
+
             for (const mixin of mixins) {
+                // If mixin is a group choice (e.g. `(A // B)`), the parser returns a Group object
+                // with Properties containing the choices. We need to extract them.
+                if (Array.isArray(mixin.Type) && mixin.Type.length > 1) {
+                     // Check if it's a choice of types
+                     const unionOptions: any[] = []
+                     for (const t of mixin.Type) {
+                         let refName: string | undefined
+                         if (typeof t === 'string') refName = t
+                         else if (isNamedGroupReference(t)) refName = t.Value
+                         else refName = (t as any).Value || (t as any).Type
+
+                         if (refName) unionOptions.push(b.tsTypeReference(b.identifier(pascalCase(refName))))
+                     }
+                     if (unionOptions.length > 0) {
+                        intersections.push(b.tsParenthesizedType(b.tsUnionType(unionOptions)))
+                        continue
+                     }
+                }
+
+                if (isGroup(mixin.Type) && Array.isArray(mixin.Type.Properties)) {
+                    const group = mixin.Type
+                    const choices: any[] = []
+
+                    for (const prop of group.Properties) {
+                        // Choices are wrapped in arrays in the properties
+                        const options = Array.isArray(prop) ? prop : [prop]
+                        if (options.length > 1) { // It's a choice within the mixin group
+                            const unionOptions: any[] = []
+                            for (const option of options) {
+                                let refName: string | undefined
+                                const type = option.Type
+                                if (typeof type === 'string') refName = type
+                                else if (isNamedGroupReference(type)) refName = type.Value
+                                else if (Array.isArray(type) && type[0]) {
+                                     const first = type[0]
+                                     if (isNamedGroupReference(first)) refName = first.Value
+                                     else if (isUnNamedProperty(first)) {
+                                         if (isNamedGroupReference(first.Type)) refName = first.Type.Value
+                                         else if (isGroup(first.Type) && first.Type.Properties && first.Type.Properties.length === 1) {
+                                            // Handle case where group reference is wrapped deeply
+                                            const subProp = first.Type.Properties[0] as Property
+                                            if (isNamedGroupReference(subProp.Type)) refName = subProp.Type.Value
+                                         }
+                                     }
+                                     if (!refName) refName = (first as any).Value || (first as any).Type
+                                }
+
+                                if (refName) unionOptions.push(b.tsTypeReference(b.identifier(pascalCase(refName))))
+                            }
+                            if (unionOptions.length > 0) {
+                                choices.push(b.tsParenthesizedType(b.tsUnionType(unionOptions)))
+                                continue
+                            }
+                        }
+
+                        for (const option of options) {
+                            let refName: string | undefined
+                            const type = option.Type
+
+                            if (typeof type === 'string') {
+                                refName = type
+                            } else if (Array.isArray(type)) {
+                                if (type.length > 1) {
+                                  // console.log('DEBUG: Found array length > 1', JSON.stringify(type, null, 2))
+                                    const unionChoices: any[] = []
+                                    for (const t of type) {
+                                        let name: string | undefined
+                                        if (typeof t === 'string') name = t
+                                        else if (isNamedGroupReference(t)) name = t.Value
+                                        else if (isUnNamedProperty(t)) {
+                                            if (isNamedGroupReference(t.Type)) name = t.Type.Value
+                                            else if (isGroup(t.Type) && t.Type.Properties && t.Type.Properties.length === 1) {
+                                                const subProp = t.Type.Properties[0] as Property
+                                                if (isNamedGroupReference(subProp.Type)) name = subProp.Type.Value
+                                            }
+                                        }
+                                        if (!name) name = (t as any).Value || (t as any).Type
+
+                                        if (name) unionChoices.push(b.tsTypeReference(b.identifier(pascalCase(name))))
+                                    }
+
+                                    if (unionChoices.length > 0) {
+                                        choices.push(b.tsParenthesizedType(b.tsUnionType(unionChoices)))
+                                        continue
+                                    }
+                                } else if (type.length === 1 && Array.isArray(type[0])) {
+                                  // Handle nested union e.g. [ [ A, B ] ] which seems common in some parsers for choices
+                                  const nested = type[0]
+                                  if (nested.length > 1) {
+                                       const unionChoices: any[] = []
+                                       for (const t of nested) {
+                                          let name: string | undefined
+                                          if (typeof t === 'string') name = t
+                                          else if (isNamedGroupReference(t)) name = t.Value
+                                          else if (isUnNamedProperty(t)) {
+                                              if (isNamedGroupReference(t.Type)) name = t.Type.Value
+                                              else if (isGroup(t.Type) && t.Type.Properties && t.Type.Properties.length === 1) {
+                                                  const subProp = t.Type.Properties[0] as Property
+                                                  if (isNamedGroupReference(subProp.Type)) name = subProp.Type.Value
+                                              }
+                                              else {
+                                                   // Fallback for wrapped primitive?
+                                                   name = (t.Type as any).Value || (t.Type as any).Type
+                                              }
+                                          }
+                                          if (!name) name = (t as any).Value || (t as any).Type
+
+                                          if (name) unionChoices.push(b.tsTypeReference(b.identifier(pascalCase(name))))
+                                      }
+                                      if (unionChoices.length > 0) {
+                                          choices.push(b.tsParenthesizedType(b.tsUnionType(unionChoices)))
+                                          continue
+                                      }
+                                  }
+                                }
+
+                                const first = type[0]
+                                if (first) {
+                                    if (isNamedGroupReference(first)) {
+                                        refName = first.Value
+                                    } else if (!isGroup(first)) {
+                                          if (isUnNamedProperty(first)) {
+                                              if (isNamedGroupReference(first.Type)) {
+                                                  refName = first.Type.Value
+                                              } else {
+                                                  refName = (first.Type as any).Value || (first.Type as any).Type
+                                              }
+                                          } else {
+                                              refName = (first as any).Value || (first as any).Type
+                                          }
+                                    } else {
+                                          refName = (first as any).Value || (first as any).Type
+                                    }
+                                }
+                            } else if (type && typeof type === 'object') {
+                                if (isGroup(type) && Array.isArray(type.Properties)) {
+                                    choices.push(b.tsTypeLiteral(parseObjectType(type.Properties as Property[])))
+                                    continue
+                                }
+                                refName = isNamedGroupReference(type)
+                                    ? type.Value || type.Type
+                                    : (type as any).Value || (type as any).Type
+                            }
+
+                            // If we found a refName, push it. Note that if this was a choice we handled above, we skip this
+                            if (refName) {
+                                choices.push(
+                                    b.tsTypeReference(b.identifier(pascalCase(refName)))
+                                )
+                            }
+                        }
+                    }
+
+                    if (choices.length > 0) {
+                        // Unions inside intersections must be parenthesized to avoid ambiguity
+                        // e.g. (A | B) & C vs A | (B & C)
+                        const union = b.tsUnionType(choices)
+                        intersections.push(b.tsParenthesizedType(union))
+                        continue
+                    }
+                }
+
                 const propType = mixin.Type as PropertyType[]
+
+                if (typeof propType === 'string' && NATIVE_TYPES[propType]) {
+                    intersections.push(NATIVE_TYPES[propType])
+                    continue
+                }
+
                 const groupRef = propType[0] as PropertyReference
-                
+
                 // Handle nested inline groups if any (though usually flat here if name is empty?)
                 const value = (groupRef?.Value || (groupRef as any)?.Type) as string
                 if (value) {
                      intersections.push(
-                         b.tsTypeReference(b.identifier(camelcase(value, { pascalCase: true })))
+                         b.tsTypeReference(b.identifier(pascalCase(value)))
                      )
                 }
             }
-            
-            const ownProps = (assignment.Properties as Property[]).filter(p => p.Name !== '')
+
+            const ownProps = props.filter(p => !isUnNamedProperty(p))
             if (ownProps.length > 0) {
                  intersections.push(b.tsTypeLiteral(parseObjectType(ownProps)))
             }
-            
+
             let value: any
             if (intersections.length === 1) {
                 value = intersections[0]
             } else {
                 value = b.tsIntersectionType(intersections)
             }
-            
+
             const expr = b.tsTypeAliasDeclaration(id, value)
             expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
             return b.exportDeclaration(false, expr)
         }
 
         // Fallback to interface if no mixins (pure object)
-        const props = assignment.Properties as Property[]
         const objectType = parseObjectType(props)
 
         const expr = b.tsInterfaceDeclaration(id, b.tsInterfaceBody(objectType))
@@ -235,13 +421,32 @@ function parseAssignment (ast: types.namedTypes.File, assignment: Assignment) {
         return b.exportDeclaration(false, expr)
     }
 
-    if (assignment.Type === 'array') {
-        const id = b.identifier(camelcase(assignment.Name, { pascalCase: true }))
-        const firstType = ((assignment.Values[0] as Property).Type as PropertyType[])
+    if (isCDDLArray(assignment)) {
+        const id = b.identifier(pascalCase(assignment.Name))
+
+        const assignmentValues = assignment.Values[0]
+
+        if (Array.isArray(assignmentValues)) {
+            // It's a choice/union in the array definition
+            // e.g. Foo = [ (A | B) ]
+            // assignment.Values[0] is Property[] (the choices)
+            // We need to parse each choice.
+            const obj = assignmentValues.map((prop) => {
+                 const t = Array.isArray(prop.Type) ? prop.Type[0] : prop.Type
+                 return parseUnionType(t)
+            })
+            const value = b.tsArrayType(b.tsParenthesizedType(b.tsUnionType(obj)))
+            const expr = b.tsTypeAliasDeclaration(id, value)
+            expr.comments = assignment.Comments.map((c) => b.commentLine(` ${c.Content}`, true))
+            return b.exportDeclaration(false, expr)
+        }
+
+        // Standard array
+        const firstType = assignmentValues.Type
         const obj = Array.isArray(firstType)
             ? firstType.map(parseUnionType)
-            : (firstType as any).Values
-                ? (firstType as any).Values.map((val: any) => parseUnionType(val.Type[0]))
+            : isCDDLArray(firstType)
+                ? firstType.Values.map((val: any) => parseUnionType(Array.isArray(val.Type) ? val.Type[0] : val.Type))
                 : [parseUnionType(firstType)]
 
         const value = b.tsArrayType(
@@ -271,7 +476,7 @@ function parseObjectType (props: Property[]): ObjectBody {
          * }
          * are ignored and later added as interface extensions
          */
-        if (prop.Name === '') {
+        if (isUnNamedProperty(prop)) {
             continue
         }
 
@@ -314,17 +519,58 @@ function parseUnionType (t: PropertyType | Assignment): TSTypeKind {
             throw new Error(`Unknown native type: "${t}`)
         }
         return NATIVE_TYPES[t]
-    } else if (NATIVE_TYPES[(t as NativeTypeWithOperator).Type as Type]) {
-        return NATIVE_TYPES[(t as NativeTypeWithOperator).Type as Type]
-    } else if ((t as PropertyReference).Value === 'null') {
+    } else if ((t as any).Type && typeof (t as any).Type === 'string' && NATIVE_TYPES[(t as any).Type]) {
+        return NATIVE_TYPES[(t as any).Type]
+    } else if (isNativeTypeWithOperator(t) && NATIVE_TYPES[(t.Type as any).Type]) {
+        return NATIVE_TYPES[(t.Type as any).Type]
+    } else if (isPropertyReference(t) && t.Value === 'null') {
         return b.tsNullKeyword()
-    } else if (t.Type === 'group') {
-        const value = (t as PropertyReference).Value as string
+    } else if (isGroup(t)) {
         /**
          * check if we have special groups
          */
-        if (!value && (t as Group).Properties) {
-            const prop = (t as Group).Properties
+        if (isGroup(t) && !isNamedGroupReference(t) && t.Properties) {
+            const prop = t.Properties
+
+            /**
+             * Check if we have choices in the group (arrays of Properties)
+             */
+            if (prop.some(p => Array.isArray(p))) {
+                const options: TSTypeKind[] = []
+                for (const choice of prop) {
+                    const subProps = Array.isArray(choice) ? choice : [choice]
+
+                    if (subProps.length === 1 && isUnNamedProperty(subProps[0])) {
+                        const first = subProps[0]
+                        const subType = Array.isArray(first.Type) ? first.Type[0] : first.Type
+                        options.push(parseUnionType(subType as PropertyType))
+                        continue
+                    }
+
+                    if (subProps.every(isUnNamedProperty)) {
+                        const tupleItems = subProps.map((p) => {
+                            const subType = Array.isArray(p.Type) ? p.Type[0] : p.Type
+                            return parseUnionType(subType as PropertyType)
+                        })
+                        options.push(b.tsTupleType(tupleItems))
+                        continue
+                    }
+
+                    options.push(b.tsTypeLiteral(parseObjectType(subProps)))
+                }
+                return b.tsUnionType(options)
+            }
+
+            if ((prop as Property[]).every(isUnNamedProperty)) {
+                 const items = (prop as Property[]).map(p => {
+                       const t = Array.isArray(p.Type) ? p.Type[0] : p.Type
+                       return parseUnionType(t as PropertyType)
+                 })
+
+                 if (items.length === 1) return items[0];
+                 return b.tsTupleType(items);
+            }
+
             /**
              * {*text => text} which will be transformed to `Record<string, string>`
              */
@@ -341,26 +587,28 @@ function parseUnionType (t: PropertyType | Assignment): TSTypeKind {
             /**
              * e.g. ?attributes: {*foo => text},
              */
-            return b.tsTypeLiteral(parseObjectType((t as Group).Properties as Property[]))
+            return b.tsTypeLiteral(parseObjectType(t.Properties as Property[]))
+        } else if (isNamedGroupReference(t)) {
+            return b.tsTypeReference(
+                b.identifier(pascalCase(t.Value))
+            )
         }
-
-        return b.tsTypeReference(
-            b.identifier(camelcase(value.toString(), { pascalCase: true }))
-        )
-    } else if (t.Type === 'literal' && typeof t.Value === 'string') {
-        return b.tsLiteralType(b.stringLiteral(t.Value))
-    } else if (t.Type === 'literal' && typeof t.Value === 'number') {
-        return b.tsLiteralType(b.numericLiteral(t.Value))
-    } else if (t.Type === 'literal' && typeof t.Value === 'boolean') {
-        return b.tsLiteralType(b.booleanLiteral(t.Value))
-    } else if (t.Type === 'array') {
+    throw new Error(`Unknown group type: ${JSON.stringify(t)}`)
+    } else if (isLiteralWithValue(t)) {
+        if (typeof t.Value === 'string') return b.tsLiteralType(b.stringLiteral(t.Value))
+        if (typeof t.Value === 'number') return b.tsLiteralType(b.numericLiteral(t.Value))
+        if (typeof t.Value === 'boolean') return b.tsLiteralType(b.booleanLiteral(t.Value))
+        if (typeof t.Value === 'bigint') return b.tsLiteralType(b.bigIntLiteral(t.Value.toString()))
+        if (t.Value === null) return b.tsNullKeyword()
+        throw new Error(`Unsupported literal type: ${JSON.stringify(t)}`)
+    } else if (isCDDLArray(t)) {
         const types = ((t as Array).Values[0] as Property).Type as PropertyType[]
         const typedTypes = (Array.isArray(types) ? types : [types]).map((val) => {
             if (typeof val === 'string' && NATIVE_TYPES[val]) {
                 return NATIVE_TYPES[val]
             }
             return b.tsTypeReference(
-                b.identifier(camelcase((val as any).Value as string, { pascalCase: true }))
+                b.identifier(pascalCase((val as any).Value as string))
             )
         })
 
@@ -372,13 +620,13 @@ function parseUnionType (t: PropertyType | Assignment): TSTypeKind {
              console.log('typedTypes[0] is missing!', types, typedTypes);
         }
         return b.tsArrayType(typedTypes[0])
-    } else if (typeof t.Type === 'object' && ((t as NativeTypeWithOperator).Type as PropertyReference).Type === 'range') {
+    } else if (isRange(t)) {
         return b.tsNumberKeyword()
-    } else if (typeof t.Type === 'object' && ((t as NativeTypeWithOperator).Type as PropertyReference).Type === 'group') {
+    } else if (isNativeTypeWithOperator(t) && isNamedGroupReference(t.Type)) {
         /**
          * e.g. ?pointerType: input.PointerType .default "mouse"
          */
-        const referenceValue = camelcase(((t as NativeTypeWithOperator).Type as PropertyReference).Value as string, { pascalCase: true })
+        const referenceValue = pascalCase(t.Type.Value)
         return b.tsTypeReference(b.identifier(referenceValue))
     }
 

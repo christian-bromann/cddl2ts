@@ -866,7 +866,7 @@ network.ContinueWithAuthParameters = {
 }
 
 network.ContinueWithAuthCredentials = (
-  action: "provideCredentials",
+  action: "provideCredentials", 
   credentials: network.AuthCredentials
 )
 
@@ -1116,14 +1116,14 @@ script.RemoteReference = (
 
 script.SharedReference = {
    sharedId: script.SharedId
-
+   
    ? handle: script.Handle,
    Extensible
 }
 
 script.RemoteObjectReference = {
    handle: script.Handle,
-
+   
    ? sharedId: script.SharedId
    Extensible
 }
@@ -1650,18 +1650,6 @@ input.SetFilesParameters = {
   context: browsingContext.BrowsingContext,
   element: script.SharedReference,
   files: [*text]
-}
-
-input.FileDialogOpened = (
-   method: "input.fileDialogOpened",
-   params: input.FileDialogInfo
-)
-
-input.FileDialogInfo = {
-   context: browsingContext.BrowsingContext,
-   ? userContext: browser.UserContext,
-   ? element: script.SharedReference,
-   multiple: bool,
 }
 
 WebExtensionCommand = (
