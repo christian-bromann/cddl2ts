@@ -53,7 +53,7 @@
   "dependencies": {
     "@babel/parser": "^7.29.0",
     "camelcase": "^9.0.0",
-    "cddl": "^0.13.0",
+    "cddl": "^0.13.1",
     "recast": "^0.23.11",
     "yargs": "^18.0.0"
   }
